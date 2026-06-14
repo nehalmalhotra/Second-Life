@@ -20,31 +20,28 @@ Docs:   http://localhost:8000/docs
 Mock:   set USE_MOCK=true to run /analyze-product without AWS.
 """
 
+from dotenv import load_dotenv
+load_dotenv()
+
 import json
 import os
 from typing import List, Optional
+from enum import Enum
 
 from fastapi import FastAPI, File, UploadFile, Form, Body
 from fastapi.middleware.cors import CORSMiddleware
-from dotenv import load_dotenv
-load_dotenv()
+
 import matching
 import bedrock_client
-app = FastAPI()
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:3001",
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 HERE = os.path.dirname(__file__)
 ROOT = os.path.dirname(HERE)
 DATA_DIR = os.path.join(ROOT, "data")
+
+# >>> CHANGED: folder holding one original listing image per product, named by
+# product_id (e.g. data/reference_images/P009.png). Private to the backend —
+# the frontends never touch it.
+REF_DIR = os.path.join(DATA_DIR, "reference_images")
 
 
 def _load(name):
@@ -82,6 +79,13 @@ RETURN_REASON_MODIFIER = {
     "Not as Described": -5,
     "Defective": -20,
 }
+class ReturnReason(str, Enum):
+    wrong_size       = "Wrong Size"
+    gift_duplicate   = "Gift Duplicate"
+    outgrown         = "Outgrown / No Longer Needed"
+    changed_mind     = "Changed Mind"
+    not_as_described = "Not as Described"
+    defective        = "Defective"
 
 
 def _clamp(n, lo, hi):
@@ -90,6 +94,18 @@ def _clamp(n, lo, hi):
 
 def _round_half_up(x):
     return int(x + 0.5)
+
+
+# >>> CHANGED: load the original listing image for a product, if one exists.
+# Returns (filename, raw_bytes) or None. Tries common extensions so you don't
+# have to standardise the file type.
+def _load_reference(product_id):
+    for ext in ("jpg", "jpeg", "png", "webp"):
+        path = os.path.join(REF_DIR, f"{product_id}.{ext}")
+        if os.path.exists(path):
+            with open(path, "rb") as f:
+                return (f"{product_id}.{ext}", f.read())
+    return None
 
 
 def tier_for_score(score):
@@ -128,7 +144,7 @@ def hub_short_name(hub_id):
 # --- App --------------------------------------------------------------------
 app = FastAPI(title="Second Life Commerce — Backend (Person 1, v4)")
 app.add_middleware(
-    CORSMiddleware, allow_origins=["http://localhost:3000"], allow_methods=["*"], allow_headers=["*"],
+    CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"],
 )
 
 # In-memory pending notifications: {buyer_id: notification_dict}
@@ -146,7 +162,8 @@ def health():
 async def analyze_product(
     images: List[UploadFile] = File(...),
     product_id: str = Form("P009"),
-    return_reason: Optional[str] = Form(None),
+    return_reason: Optional[ReturnReason] = Form(None),
+    comment: Optional[str] = Form(None),   # >>> CHANGED: optional owner note
 ):
     """Vision condition assessment + tier + routing. Pricing is NOT here."""
     if product_id not in PRODUCTS:
@@ -155,6 +172,9 @@ async def analyze_product(
     # Treat empty string from form fields as "no return reason" (Entry Point B).
     if return_reason in ("", "null", "None"):
         return_reason = None
+    # >>> CHANGED: same normalisation for the comment.
+    if comment in ("", "null", "None"):
+        comment = None
 
     if USE_MOCK:
         # Stable demo values. P009 (Rahul's voluntary speaker) -> Like New.
@@ -164,17 +184,35 @@ async def analyze_product(
             "raw_score": raw[0], "confidence": 94,
             "scuffs_detected": False, "packaging_intact": True,
             "product_complete": True, "visible_wear": raw[1],
+            "functional_defect": False,   # >>> CHANGED: keep field present in mock
             "ai_description": "Item is in clean condition with no visible damage.",
         }
     else:
-        loaded = [(p.filename, await p.read()) for p in images[:3]]
-        vision = bedrock_client.analyze_with_bedrock(loaded)
+        # >>> CHANGED: send the original listing image (if we have one) alongside
+        # the owner's photos, plus the owner's comment, in the single Bedrock call.
+        user_photos = [(img.filename, await img.read()) for img in images]
+        reference = _load_reference(product_id)
+        photos = ([reference] if reference else []) + user_photos
+        vision = bedrock_client.analyze_with_bedrock(
+            photos, comment=comment, has_reference=reference is not None
+        )
 
     # Apply the v4 scoring chain.
     modifier = RETURN_REASON_MODIFIER.get(return_reason, 0)  # null/absent -> 0
     adjusted = _clamp(vision["raw_score"] + modifier, 0, 100)
     condition = tier_for_score(adjusted)
     routing = routing_for_score(adjusted)
+
+    # >>> CHANGED: a reported functional problem demotes a would-be resale item
+    # to refurbishment, so /generate-listing correctly refuses to list it.
+    functional_defect = bool(vision.get("functional_defect", False))
+    if functional_defect and routing == "second_life":
+        routing = "refurbishment"
+
+    routing_reason = make_routing_reason(routing, condition, vision["visible_wear"])
+    if functional_defect:
+        routing_reason = ("A functional issue was reported, so the item is routed to "
+                          "refurbishment rather than direct resale.")
 
     return {
         "success": True,
@@ -183,12 +221,13 @@ async def analyze_product(
         "condition": condition,
         "confidence": vision["confidence"],
         "routing": routing,
-        "routing_reason": make_routing_reason(routing, condition, vision["visible_wear"]),
+        "routing_reason": routing_reason,
         "attributes": {
             "scuffs_detected": vision["scuffs_detected"],
             "packaging_intact": vision["packaging_intact"],
             "product_complete": vision["product_complete"],
             "visible_wear": vision["visible_wear"],
+            "functional_defect": functional_defect,   # >>> CHANGED: extra key, no one is required to render it
         },
         "ai_description": vision["ai_description"],
     }
@@ -274,10 +313,6 @@ def notify(payload: dict = Body(...)):
     buyer_id = payload["buyer_id"]
     listing = payload["listing"]
 
-    print("NOTIFY CALLED")
-    print("BUYER ID =", buyer_id)
-    print("LISTING =", listing["product_id"])
-
     buyer = USERS_BY_ID.get(buyer_id)
     listing_hub = listing.get("hub_id")
     if buyer and buyer.get("hub_id") == listing_hub:
@@ -298,17 +333,5 @@ def notify(payload: dict = Body(...)):
 
 @app.get("/notify-status/{buyer_id}")
 def notify_status(buyer_id: str):
-    print("POLLING:", buyer_id)
-    print("CURRENT NOTIFICATIONS:", PENDING_NOTIFICATIONS)
-
     note = PENDING_NOTIFICATIONS.pop(buyer_id, None)
-
-    print("RETURNING:", note)
-
-    return {
-        "success": True,
-        "notification": note
-    }
-@app.get("/debug-notifications")
-def debug_notifications():
-    return PENDING_NOTIFICATIONS
+    return {"success": True, "notification": note}  # note is None when nothing pending
