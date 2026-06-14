@@ -1,0 +1,28 @@
+[
+    {
+      "product_id": "P009",
+      "name": "boAt Aavante Bar 490 Bluetooth Speaker",
+      "category": "Electronics",
+      "original_price": 1499,
+      "currency": "INR",
+      "asin": "B0CH3G9VR2",
+      "short_description": "Full-range Bluetooth soundbar speaker with immersive audio, wireless connectivity and compact design.",
+      "demo_photo_folder": "bluetooth_speaker",
+      "hub_id": "H001",
+      "listing_status": "available",
+      "listed_date": "2025-06-04"
+    },
+    {
+      "product_id": "P001",
+      "name": "Cello H2O Unbreakable Water Bottle 1L",
+      "category": "Kitchen & Dining",
+      "original_price": 349,
+      "currency": "INR",
+      "asin": "B01BYBTZLI",
+      "short_description": "BPA-free 1-litre unbreakable plastic water bottle with silicone sleeve and leak-proof break-proof cap.",
+      "demo_photo_folder": "water_bottle",
+      "hub_id": "H003",
+      "listing_status": "available",
+      "listed_date": "2025-06-01"
+    }
+  ]

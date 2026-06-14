@@ -1,0 +1,451 @@
+{
+  "_version": "v4",
+  "_change_from_v2": [
+    "RESTORED POST /match-buyers and POST /notify (+ new GET /notify-status/{buyer_id}). These existed in the original division of work but were dropped in v2. They're back because Person 3's 'buyer gets notified' screen depends on them.",
+    "PRICING LOGIC PLACEMENT \u2014 DECISION MADE: pricing stays entirely in /generate-listing. /analyze-product owns condition + routing determination (including applying return_reason_score_modifier to the raw vision score). See _pricing_logic_placement_DECISION inside /generate-listing for the full reasoning.",
+    "Condition tiers and routing rules from config.json are now explicitly embedded in this contract (see shared_reference) so /analyze-product and /generate-listing's logic is fully spelled out, not just referenced.",
+    "return_reason is now OPTIONAL / nullable on /analyze-product and /generate-listing \u2014 Entry Point B (voluntary 'Give it a Second Life' listings) has no return reason. When null, return_reason_score_modifier = 0 (no adjustment).",
+    "/generate-listing response now includes entry_point ('A' = return, 'B' = voluntary listing), derived from whether return_reason was provided. This is what should be written to transactions.json as transaction_type later (A -> 'return', B -> 'second_life_listing').",
+    "/generate-listing now documents the 'Below Threshold' edge case \u2014 these items are not eligible for Second Life and the endpoint returns an error.",
+    "FIXED MOCK DATA MISMATCHES: v2's 'analyze_product_rahul_p003' mock described a 'Pigeon Baby Feeding Spoon Set' (Rs 299) that does not match products.json P003 (which is an iPhone 15 phone case, Rs 499). v2's 'analyze_product_sneha_p011' mock described resistance bands, but products.json P011 is a desk lamp \u2014 resistance bands are actually P006. Both fixed below: the voluntary-listing example now correctly uses P007 (Pikipo Baby Rattle, Rs 399, Baby Products, hub H002), and the resistance-bands example now correctly uses P006.",
+    "DEMO PRODUCT SWAP (v3 \u2192 v4): Baby monitor replaced with P009 (boAt Aavante Bar 490 Bluetooth Speaker, Rs 1499, hub H001) as Rahul's voluntary listing product. Buyer updated to Ashish Verma (U001) \u2014 perfect 100-point match (Electronics wishlist \u00b7 H001 hub \u00b7 within Rs 3000 limit). New mocks added: analyze_product_p009_rahul_voluntary, listing_p009_rahul_voluntary, match_buyers_p009, notify_u001, notify_status_u001_pending. /compare response_success consistency_score standardised to 91 to match demo mock. /generate-listing response_success updated: P003 example now correctly shows Amazon Basics iPhone 15 Case (Rs 499, Entry Point B) instead of stale Pigeon baby spoon set.",
+    "MOCK CLEANUP (v4): Removed stale P007/Arjun Kapoor mocks (analyze_product_p007_voluntary_listing, match_buyers_p007, notify_u005, notify_status_u005_pending) \u2014 these belonged to the baby rattle demo flow which was replaced by the P009 Bluetooth speaker / Ashish Verma flow."
+  ],
+  "base_url_local": "http://localhost:8000",
+  "base_url_deployed": "TBD",
+  "shared_reference": {
+    "_source_of_truth": "config.json is canonical. This block is duplicated here ONLY so the contract is self-contained and readable without cross-referencing another file. If config.json changes, update this block to match.",
+    "condition_tiers": {
+      "Like New": {
+        "score_min": 85,
+        "score_max": 100,
+        "discount_midpoint": 18
+      },
+      "Good": {
+        "score_min": 65,
+        "score_max": 84,
+        "discount_midpoint": 30
+      },
+      "Acceptable": {
+        "score_min": 40,
+        "score_max": 64,
+        "discount_midpoint": 45
+      },
+      "Below Threshold": {
+        "score_min": 0,
+        "score_max": 39,
+        "discount_midpoint": null
+      }
+    },
+    "routing_rules": {
+      "second_life": {
+        "score_min": 60,
+        "score_max": 100
+      },
+      "refurbishment": {
+        "score_min": 40,
+        "score_max": 59
+      },
+      "donation": {
+        "score_min": 20,
+        "score_max": 39
+      },
+      "recycling": {
+        "score_min": 0,
+        "score_max": 19
+      }
+    },
+    "return_reason_score_modifier": {
+      "Wrong Size": 10,
+      "Gift Duplicate": 8,
+      "Outgrown / No Longer Needed": 5,
+      "Changed Mind": 0,
+      "Not as Described": -5,
+      "Defective": -20,
+      "null_or_absent": 0
+    }
+  },
+  "endpoints": {
+    "POST /analyze-product": {
+      "_description": "Accepts product photos + product_id + optional return_reason. Returns an adjusted condition score, the resulting condition tier, routing decision, AI attributes, and AI description. Pricing is NOT calculated here.",
+      "request": {
+        "images": "multipart/form-data \u2014 one or more image files",
+        "product_id": "string \u2014 must match a product_id in products.json",
+        "return_reason": "string or null \u2014 must match a value in config.json return_reasons, OR null/absent for Entry Point B (voluntary 'Give it a Second Life' listings, which have no return reason)"
+      },
+      "_scoring_logic": {
+        "step_1_raw_score": "Bedrock Vision returns a raw visual condition score (0-100) based on the uploaded photos \u2014 damage, completeness, packaging, cleanliness.",
+        "step_2_adjust": "adjusted_score = clamp(raw_score + return_reason_score_modifier[return_reason ?? 'null_or_absent'], 0, 100). A 'Defective' return drags the score down even if the photos look fine, because the defect may not be visible (e.g. internal electronics). A 'Wrong Size' return gets a boost because the return reason itself confirms the item was barely used.",
+        "step_3_condition": "Look up adjusted_score in shared_reference.condition_tiers (score_min <= adjusted_score <= score_max) to set `condition`.",
+        "step_4_routing": "Look up adjusted_score in shared_reference.routing_rules (score_min <= adjusted_score <= score_max) to set `routing`. Note routing and condition use DIFFERENT range boundaries \u2014 a score of 75 is condition 'Good' (65-84) AND routing 'second_life' (60-100); a score of 50 is condition 'Acceptable' (40-64) AND routing 'refurbishment' (40-59).",
+        "step_5_routing_reason": "Generate a one-sentence explanation referencing why this routing was chosen \u2014 should be human-readable enough to read aloud to a judge.",
+        "step_6_description": "Generate ai_description \u2014 1-2 sentence visual summary of the item's condition from the photos.",
+        "worked_example": "Raw vision score 73 ('Good' range on its own) + 'Defective' modifier (-20) = adjusted score 53 -> condition 'Acceptable' (40-64) AND routing 'refurbishment' (40-59), NOT 'second_life'. This is exactly why return_reason matters even when the photos alone would have qualified for Second Life."
+      },
+      "response_success": {
+        "success": true,
+        "product_id": "P001",
+        "score": 83,
+        "condition": "Good",
+        "confidence": 94,
+        "routing": "second_life",
+        "routing_reason": "Minor wear detected. Product remains fully functional and suitable for resale.",
+        "attributes": {
+          "scuffs_detected": false,
+          "packaging_intact": true,
+          "product_complete": true,
+          "visible_wear": "minor"
+        },
+        "ai_description": "The bottle body is in clean condition with no visible dents or cracks. The cap shows minor surface marks but seals properly."
+      },
+      "response_error": {
+        "success": false,
+        "error": "string describing what went wrong"
+      },
+      "_notes": [
+        "score is the ADJUSTED score (after return_reason_score_modifier), integer 0-100",
+        "condition is exactly one of: Like New | Good | Acceptable | Below Threshold",
+        "confidence is integer 0-100, the model's confidence in the raw visual assessment (not affected by the return_reason adjustment)",
+        "routing is exactly one of: second_life | refurbishment | donation | recycling",
+        "visible_wear is exactly one of: none | minor | moderate | severe",
+        "discount_percent and discounted_price are NOT in this response \u2014 they live in /generate-listing"
+      ]
+    },
+    "POST /compare": {
+      "_description": "Accepts two sets of photos \u2014 customer photos and driver photos \u2014 and returns a fraud consistency verdict.",
+      "request": {
+        "customer_images": "multipart/form-data \u2014 one or more image files from customer",
+        "driver_images": "multipart/form-data \u2014 one or more image files from driver",
+        "product_id": "string \u2014 must match a product_id in products.json"
+      },
+      "response_success": {
+        "success": true,
+        "consistency_score": 91,
+        "verdict": "confirmed",
+        "mismatch_reason": null
+      },
+      "response_error": {
+        "success": false,
+        "error": "string describing what went wrong"
+      },
+      "_notes": [
+        "consistency_score is integer 0-100",
+        "verdict is exactly one of: confirmed | flagged",
+        "verdict is confirmed if consistency_score >= 70, flagged otherwise",
+        "mismatch_reason is null when verdict is confirmed",
+        "mismatch_reason is a single sentence string when verdict is flagged"
+      ]
+    },
+    "POST /generate-listing": {
+      "_description": "Accepts the result of /analyze-product and returns a marketplace-ready listing with pricing. This is where ALL business rules (pricing, hub assignment, delivery estimate, entry-point classification) are applied.",
+      "_pricing_logic_placement_DECISION": {
+        "decision": "Pricing logic (discount_percent, discounted_price) lives ENTIRELY in /generate-listing. Nothing in /analyze-product touches price.",
+        "why": "/analyze-product answers 'what condition is this item and where should it be routed' \u2014 a vision + return-context question. /generate-listing answers 'given that condition, what does the marketplace listing look like' \u2014 a pure lookup/pricing question over condition_tiers, products.json, and hubs.json. Pricing never needs the photos or another model call.",
+        "what_this_means_for_implementation": "Person 1 can build /generate-listing as a pure function (condition string + product_id in, full listing JSON out) with ZERO AI dependency. It can be built and fully unit-tested before the Bedrock integration for /analyze-product is even working. This de-risks the critical path: if the Bedrock call is running late on integration day, /generate-listing is already done and waiting."
+      },
+      "request": {
+        "product_id": "string \u2014 must match a product_id in products.json",
+        "score": "integer 0-100 \u2014 the ADJUSTED score from /analyze-product",
+        "condition": "string \u2014 Like New | Good | Acceptable | Below Threshold",
+        "routing": "string \u2014 second_life | refurbishment | donation | recycling",
+        "return_reason": "string or null \u2014 pass through from /analyze-product request. null/absent = Entry Point B (voluntary listing)",
+        "attributes": {
+          "scuffs_detected": "boolean",
+          "packaging_intact": "boolean",
+          "product_complete": "boolean",
+          "visible_wear": "string"
+        }
+      },
+      "_pricing_calculation": {
+        "step_1_eligibility": "If condition == 'Below Threshold' (or routing != 'second_life'), return response_error_not_eligible below \u2014 this item does not get a Second Life listing.",
+        "step_2_discount": "discount_percent = shared_reference.condition_tiers[condition].discount_midpoint",
+        "step_3_price": "discounted_price = round(original_price * (1 - discount_percent / 100)) \u2014 round half up. original_price comes from products.json[product_id].original_price",
+        "step_4_hub": "hub_id = products.json[product_id].hub_id",
+        "step_5_delivery": "estimated_delivery = 'Same Day' if the buyer's pincode is in hubs.json[hub_id].coverage_pincodes, else 'Next Day'. For the demo, default to 'Same Day' \u2014 all demo products/buyers are within their assigned hub's coverage.",
+        "step_6_entry_point": "entry_point = 'A' if return_reason is non-null, else 'B'. This single field is what later gets written to transactions.json as transaction_type ('A' -> 'return', 'B' -> 'second_life_listing')."
+      },
+      "response_success": {
+        "success": true,
+        "listing": {
+          "product_id": "P003",
+          "listing_title": "Amazon Basics iPhone 15 Compatible Phone Case \u2014 Like New",
+          "condition_badge": "Like New",
+          "ai_description": "The case is in pristine condition with no scratches or marks. Original packaging is intact with no damage.",
+          "original_price": 499,
+          "discount_percent": 18,
+          "discounted_price": 409,
+          "return_reason_display": null,
+          "amazon_verified": true,
+          "hub_id": "H003",
+          "estimated_delivery": "Same Day",
+          "entry_point": "B"
+        }
+      },
+      "response_error": {
+        "success": false,
+        "error": "string describing what went wrong"
+      },
+      "response_error_not_eligible": {
+        "success": false,
+        "error": "Item condition 'Below Threshold' is not eligible for a Second Life listing. Routed to: {routing}."
+      },
+      "_notes": [
+        "listing_title is always: [product name] \u2014 [condition_badge]",
+        "discount_percent is the condition tier's discount_midpoint, no per-item variation in the prototype (see config.json _future_considerations for the dynamic-discount idea, explicitly deferred)",
+        "return_reason_display is null when return_reason was null (Entry Point B) \u2014 frontend should show 'Listed by Owner' instead of a return-reason chip in that case",
+        "amazon_verified is always true for any listing that reaches this endpoint",
+        "hub_id is pulled from products.json for the given product_id",
+        "entry_point is 'A' (return) or 'B' (voluntary listing) \u2014 drives transaction_type for the business impact dashboard"
+      ]
+    },
+    "POST /match-buyers": {
+      "_description": "Takes a newly generated listing and ranks all buyers (users.json) by how well it matches their profile. Pure Python weighted scoring \u2014 no ML, fully explainable to judges.",
+      "_restored_in_v3": "Present in the original division of work but missing from v2. Restored because Person 3's notification screen depends on it.",
+      "request": {
+        "product_id": "string",
+        "category": "string \u2014 from products.json",
+        "discounted_price": "integer \u2014 from /generate-listing output",
+        "hub_id": "string \u2014 from products.json"
+      },
+      "_scoring_logic": {
+        "category_match": "+40 if `category` is in buyer.wishlist (users.json)",
+        "hub_match": "+35 if buyer.hub_id == `hub_id` (same fulfillment hub, displayed to the buyer as 'near you')",
+        "price_fit": "+25 if `discounted_price` <= buyer.price_range_max",
+        "match_reason_template": "Join only the clauses for criteria that actually matched, in this order: '[category] on your wishlist' \u00b7 'available near you' \u00b7 'within your price range'. Separator: ' \u00b7 '. A buyer with all three is a 100-point full match; a buyer with zero matching criteria is excluded entirely (not returned)."
+      },
+      "response_success": {
+          "success": true,
+          "product_id": "P009",
+          "matches": [
+          {
+          "buyer_id": "U001",
+          "buyer_name": "Ashish Verma",
+          "match_score": 100,
+          "match_reason": "Electronics on your wishlist · available near you · within your price range"
+          },
+          {
+          "buyer_id": "U004",
+          "buyer_name": "Sneha Iyer",
+          "match_score": 40,
+          "match_reason": "Electronics on your wishlist"
+          },
+          {
+          "buyer_id": "U003",
+          "buyer_name": "Rahul Mehta",
+          "match_score": 35,
+          "match_reason": "available near you"
+          }
+        ]
+      },
+
+      "response_error": {
+        "success": false,
+        "error": "string describing what went wrong"
+      },
+      "_notes": [
+        "matches is sorted descending by match_score",
+        "Only buyers with match_score > 0 are included",
+        "If matches is empty, the listing still goes live in the marketplace \u2014 it just isn't proactively pushed to anyone. This is fine and worth saying out loud to judges: matching is additive, not a gatekeeper."
+      ]
+    },
+    "POST /notify": {
+      "_description": "Marks the top-ranked buyer from /match-buyers as having a pending notification. No real push infrastructure \u2014 sets an in-memory/JSON flag that the buyer's frontend polls.",
+      "_restored_in_v3": "Present in the original division of work but missing from v2. Restored because Person 3's notification banner depends on it.",
+      "request": {
+        "buyer_id": "string \u2014 typically matches[0].buyer_id from /match-buyers",
+        "listing": "object \u2014 the full listing object from /generate-listing's response.listing"
+      },
+      "response_success": {
+        "success": true,
+        "notified": true,
+        "buyer_id": "U001"
+      },
+      "response_error": {
+        "success": false,
+        "error": "string describing what went wrong"
+      }
+      ,
+      "response_when_pending": {
+        "success": true,
+        "notification": {
+        "product_id": "P009",
+        "listing_title": "boAt Aavante Bar 490 Bluetooth Speaker — Like New",
+        "condition_badge": "Like New",
+        "discounted_price": 1229,
+        "distance_label": "Same hub — Bhiwandi",
+        "estimated_delivery": "Same Day"
+        }
+      },
+
+      "response_when_none": {
+        "success": true,
+        "notification": null
+      },
+      "_notes": [
+        "Once delivered to the frontend, the backend can clear the flag so the same notification doesn't fire repeatedly \u2014 or leave it set and let the frontend track 'already shown' client-side. Either is fine for a 36-hour build; document whichever Person 1 picks."
+      ]
+    }
+  },
+  "mock_responses": {
+    "_comment": "Person 2 and Person 3 hardcode these during independent development, then swap for real fetch() calls at integration hour. All examples below use REAL product_ids, categories, prices, and hub_ids from products.json / users.json / hubs.json \u2014 no invented products.",
+    "analyze_product_p001_priya_return": {
+      "_context": "Entry Point A \u2014 Priya returns the water bottle, reason 'Wrong Size'",
+      "success": true,
+      "product_id": "P001",
+      "score": 83,
+      "condition": "Good",
+      "confidence": 91,
+      "routing": "second_life",
+      "routing_reason": "Minor surface wear detected. Product is fully functional and suitable for resale.",
+      "attributes": {
+        "scuffs_detected": false,
+        "packaging_intact": true,
+        "product_complete": true,
+        "visible_wear": "minor"
+      },
+      "ai_description": "The bottle body is in clean condition with no visible dents or cracks. The cap shows minor surface marks but seals properly."
+    },
+    "analyze_product_p006_resistance_bands": {
+      "_context": "Entry Point A \u2014 return, reason 'Changed Mind'. FIXED from v2's mislabeled 'P011' (P011 is actually a desk lamp; resistance bands are P006).",
+      "success": true,
+      "product_id": "P006",
+      "score": 78,
+      "condition": "Good",
+      "confidence": 88,
+      "routing": "second_life",
+      "routing_reason": "All bands functional with minor wear. Original carry pouch included. Suitable for Second Life.",
+      "attributes": {
+        "scuffs_detected": false,
+        "packaging_intact": false,
+        "product_complete": true,
+        "visible_wear": "minor"
+      },
+      "ai_description": "All 5 bands are present and in good elastic condition with no tears. Original packaging is absent but the carry pouch is included."
+    },
+    "compare_confirmed": {
+      "success": true,
+      "consistency_score": 91,
+      "verdict": "confirmed",
+      "mismatch_reason": null
+    },
+    "compare_flagged": {
+      "success": true,
+      "consistency_score": 42,
+      "verdict": "flagged",
+      "mismatch_reason": "Driver photo shows a visible crack on the body that is absent in the customer's submission."
+    },
+    "listing_p001_priya_return": {
+      "success": true,
+      "listing": {
+        "product_id": "P001",
+        "listing_title": "Cello H2O Unbreakable Water Bottle 1L \u2014 Good",
+        "condition_badge": "Good",
+        "ai_description": "The bottle body is in clean condition with no visible dents or cracks. The cap shows minor surface marks but seals properly.",
+        "original_price": 349,
+        "discount_percent": 30,
+        "discounted_price": 244,
+        "return_reason_display": "Wrong Size",
+        "amazon_verified": true,
+        "hub_id": "H003",
+        "estimated_delivery": "Same Day",
+        "entry_point": "A"
+      }
+    },
+    "listing_p006_resistance_bands": {
+      "success": true,
+      "listing": {
+        "product_id": "P006",
+        "listing_title": "Boldfit Resistance Bands Set \u2014 Good",
+        "condition_badge": "Good",
+        "ai_description": "All 5 bands are present and in good elastic condition with no tears. Original packaging is absent but the carry pouch is included.",
+        "original_price": 599,
+        "discount_percent": 30,
+        "discounted_price": 419,
+        "return_reason_display": "Changed Mind",
+        "amazon_verified": true,
+        "hub_id": "H002",
+        "estimated_delivery": "Same Day",
+        "entry_point": "A"
+      }
+    },
+    "notify_status_none": {
+      "success": true,
+      "notification": null
+    },
+    "analyze_product_p009_rahul_voluntary": {
+      "_context": "Entry Point B \u2014 Rahul voluntarily lists the boAt Bluetooth Speaker he no longer needs. return_reason is null.",
+      "success": true,
+      "product_id": "P009",
+      "score": 88,
+      "condition": "Like New",
+      "confidence": 94,
+      "routing": "second_life",
+      "routing_reason": "No signs of use detected. Packaging intact. Qualifies as Like New for immediate Second Life listing.",
+      "attributes": {
+        "scuffs_detected": false,
+        "packaging_intact": true,
+        "product_complete": true,
+        "visible_wear": "none"
+      },
+      "ai_description": "The speaker body is in pristine condition with no scratches or marks. Original packaging and all accessories are intact."
+    },
+    "listing_p009_rahul_voluntary": {
+      "success": true,
+      "listing": {
+        "product_id": "P009",
+        "listing_title": "boAt Aavante Bar 490 Bluetooth Speaker \u2014 Like New",
+        "condition_badge": "Like New",
+        "ai_description": "The speaker body is in pristine condition with no scratches or marks. Original packaging and all accessories are intact.",
+        "original_price": 1499,
+        "discount_percent": 18,
+        "discounted_price": 1229,
+        "return_reason_display": null,
+        "amazon_verified": true,
+        "hub_id": "H001",
+        "estimated_delivery": "Same Day",
+        "entry_point": "B"
+      }
+    },
+    "match_buyers_p009": {
+      "_context": "Result of /match-buyers for the P009 Bluetooth speaker listing. Ashish Verma (U001) is a perfect match: Electronics is on his wishlist, his hub (H001) matches the product hub (H001), and Rs 1229 is well within his Rs 3000 limit.",
+      "success": true,
+      "product_id": "P009",
+      "matches": [
+        {
+          "buyer_id": "U001",
+          "buyer_name": "Ashish Verma",
+          "match_score": 100,
+          "match_reason": "Electronics on your wishlist \u00b7 available near you \u00b7 within your price range"
+        },
+        {
+          "buyer_id": "U003",
+          "buyer_name": "Rahul Mehta",
+          "match_score": 35,
+          "match_reason": "available near you"
+        },
+        {
+          "buyer_id": "U004",
+          "buyer_name": "Sneha Iyer",
+          "match_score": 40,
+          "match_reason": "Electronics on your wishlist"
+        }
+      ]
+    },
+    "notify_u001": {
+      "success": true,
+      "notified": true,
+      "buyer_id": "U001"
+    },
+    "notify_status_u001_pending": {
+      "success": true,
+      "notification": {
+        "product_id": "P009",
+        "listing_title": "boAt Aavante Bar 490 Bluetooth Speaker \u2014 Like New",
+        "condition_badge": "Like New",
+        "discounted_price": 1229,
+        "distance_label": "Same hub \u2014 Bhiwandi",
+        "estimated_delivery": "Same Day"
+      }
+    }
+  }
+}

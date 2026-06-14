@@ -1,0 +1,42 @@
+[
+    {
+      "user_id": "U001",
+      "name": "Ashish Verma",
+      "location": "Andheri, Mumbai",
+      "hub_id": "H001",
+      "wishlist": ["Baby Products", "Toys & Games", "Electronics"],
+      "price_range_max": 3000
+    },
+    {
+      "user_id": "U002",
+      "name": "Priya Sharma",
+      "location": "Lajpat Nagar, Delhi",
+      "hub_id": "H003",
+      "wishlist": ["Kitchen & Dining", "Kitchen Tools", "Home & Office"],
+      "price_range_max": 800
+    },
+    {
+      "user_id": "U003",
+      "name": "Rahul Mehta",
+      "location": "Andheri West, Mumbai",
+      "hub_id": "H001",
+      "wishlist": ["Sports & Fitness", "Mobile Accessories"],
+      "price_range_max": 1200
+    },
+    {
+      "user_id": "U004",
+      "name": "Sneha Iyer",
+      "location": "T. Nagar, Chennai",
+      "hub_id": "H002",
+      "wishlist": ["Computer Accessories", "Mobile Accessories", "Electronics"],
+      "price_range_max": 600
+    },
+    {
+      "user_id": "U005",
+      "name": "Arjun Kapoor",
+      "location": "Salt Lake, Kolkata",
+      "hub_id": "H002",
+      "wishlist": ["Sports & Fitness", "Home & Office", "Baby Products"],
+      "price_range_max": 1500
+    }
+  ]

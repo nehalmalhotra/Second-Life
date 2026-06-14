@@ -1,0 +1,115 @@
+{
+  "_comment": "Visual design contract. Person 2 and Person 3 must both use these exact values. Agree on this in the first 2 hours and do not change anything after both start building.",
+
+  "color_palette": {
+    "primary_orange": "#FF9900",
+    "primary_orange_hover": "#E68900",
+    "dark_navy": "#131921",
+    "medium_navy": "#232F3E",
+    "light_navy": "#37475A",
+    "white": "#FFFFFF",
+    "off_white": "#F3F3F3",
+    "border_grey": "#DDDDDD",
+    "text_primary": "#111111",
+    "text_secondary": "#555555",
+    "text_muted": "#999999",
+    "success_green": "#067D62",
+    "warning_yellow": "#F0A500",
+    "error_red": "#CC0C39"
+  },
+
+  "condition_badge_colors": {
+    "Like New":        { "background": "#E6F4EA", "text": "#1A7340", "border": "#A8D5B5" },
+    "Good":            { "background": "#E8F0FE", "text": "#1A56A0", "border": "#A8C4F0" },
+    "Acceptable":      { "background": "#FFF3CD", "text": "#856404", "border": "#FFD966" },
+    "Below Threshold": { "background": "#FCE8E8", "text": "#8B1A1A", "border": "#F5A0A0" }
+  },
+
+  "typography": {
+    "font_family": "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    "font_size_xs": "11px",
+    "font_size_sm": "13px",
+    "font_size_base": "14px",
+    "font_size_md": "16px",
+    "font_size_lg": "20px",
+    "font_size_xl": "24px",
+    "font_size_xxl": "32px",
+    "font_weight_normal": 400,
+    "font_weight_medium": 500,
+    "font_weight_semibold": 600,
+    "font_weight_bold": 700
+  },
+
+  "spacing": {
+    "xs": "4px",
+    "sm": "8px",
+    "md": "16px",
+    "lg": "24px",
+    "xl": "32px",
+    "xxl": "48px"
+  },
+
+  "border_radius": {
+    "sm": "4px",
+    "md": "8px",
+    "lg": "12px",
+    "pill": "100px"
+  },
+
+  "components": {
+    "header": {
+      "background": "#131921",
+      "height": "60px",
+      "logo_text": "second life",
+      "logo_color": "#FF9900",
+      "logo_prefix": "amazon",
+      "logo_prefix_color": "#FFFFFF"
+    },
+    "product_card": {
+      "background": "#FFFFFF",
+      "border": "1px solid #DDDDDD",
+      "border_radius": "8px",
+      "padding": "16px",
+      "shadow": "0 1px 3px rgba(0,0,0,0.08)"
+    },
+    "primary_button": {
+      "background": "#FF9900",
+      "text": "#111111",
+      "border_radius": "8px",
+      "padding": "10px 20px",
+      "font_weight": 600
+    },
+    "secondary_button": {
+      "background": "#FFFFFF",
+      "border": "1px solid #FF9900",
+      "text": "#FF9900",
+      "border_radius": "8px",
+      "padding": "10px 20px"
+    },
+    "score_ring": {
+      "like_new_color": "#1A7340",
+      "good_color": "#1A56A0",
+      "acceptable_color": "#856404",
+      "below_threshold_color": "#8B1A1A",
+      "size": "120px"
+    },
+    "amazon_verified_badge": {
+      "text": "Amazon Verified",
+      "icon": "checkmark-shield",
+      "color": "#067D62",
+      "background": "#E6F4EA"
+    }
+  },
+
+  "shared_tailwind_classes": {
+    "_note": "If using Tailwind, use these class combinations consistently across both apps",
+    "page_background": "bg-gray-50 min-h-screen",
+    "card": "bg-white border border-gray-200 rounded-lg p-4 shadow-sm",
+    "heading_primary": "text-2xl font-bold text-gray-900",
+    "heading_secondary": "text-lg font-semibold text-gray-800",
+    "body_text": "text-sm text-gray-700",
+    "muted_text": "text-xs text-gray-400",
+    "btn_primary": "bg-yellow-400 text-gray-900 font-semibold px-5 py-2.5 rounded-lg hover:bg-yellow-500",
+    "btn_secondary": "border border-yellow-400 text-yellow-600 font-semibold px-5 py-2.5 rounded-lg hover:bg-yellow-50"
+  }
+}

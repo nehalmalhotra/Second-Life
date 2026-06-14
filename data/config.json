@@ -1,0 +1,107 @@
+{
+  "_version": "v3",
+  "_change_from_v2": [
+    "discount_midpoint for 'Like New' changed from 17 to 18. The range is 15-20, true midpoint is 17.5. transactions.json already uses 18 (round-half-up) across all 19 Like New records. Changing config to 18 (one value) is far less work than recomputing 19 transaction records, and round-half-up is the standard JS Math.round() behaviour — so 18 is also the 'natural' answer if /generate-listing computes this at runtime instead of reading a hardcoded constant.",
+    "Added transaction_types — distinguishes 'return' (Entry Point A) from 'second_life_listing' (Entry Point B). This determines which cost-saving fields apply to a transaction, and is the basis for the self-funding claim.",
+    "Added return_reason_score_modifier.default_for_no_return_reason — Entry Point B (voluntary listings) has no return_reason, so the modifier defaults to 0 (no adjustment).",
+    "Added writeoff_value_avoided_formula — documents that this value is always round(original_price * 0.15), confirmed against all 50 transactions.",
+    "Added _future_considerations — documents the dynamic-discount-from-logistics-savings idea as an explicitly out-of-scope v2 direction. Fixed discount_midpoint values are used for the prototype."
+  ],
+
+  "return_reasons": [
+    "Wrong Size",
+    "Changed Mind",
+    "Gift Duplicate",
+    "Outgrown / No Longer Needed",
+    "Defective",
+    "Not as Described"
+  ],
+
+  "return_reason_score_modifier": {
+    "Wrong Size":                  10,
+    "Gift Duplicate":               8,
+    "Outgrown / No Longer Needed":  5,
+    "Changed Mind":                 0,
+    "Not as Described":            -5,
+    "Defective":                  -20,
+    "default_for_no_return_reason": 0,
+    "_note": "Entry Point B (the 'Give it a Second Life' voluntary listing flow) has no return_reason — the seller isn't returning anything to Amazon. /analyze-product treats a missing/null return_reason as modifier 0: the Bedrock score is used as-is, with no adjustment."
+  },
+
+  "condition_tiers": {
+    "Like New":        { "score_min": 85, "score_max": 100, "discount_min": 15, "discount_max": 20, "discount_midpoint": 18 },
+    "Good":            { "score_min": 65, "score_max": 84,  "discount_min": 25, "discount_max": 35, "discount_midpoint": 30 },
+    "Acceptable":      { "score_min": 40, "score_max": 64,  "discount_min": 40, "discount_max": 50, "discount_midpoint": 45 },
+    "Below Threshold": { "score_min": 0,  "score_max": 39,  "discount_min": null, "discount_max": null, "discount_midpoint": null }
+  },
+
+  "routing_rules": {
+    "second_life":   { "score_min": 60, "score_max": 100, "rationale": "Fully functional. Condition good enough for direct resale." },
+    "refurbishment": { "score_min": 40, "score_max": 59,  "rationale": "Minor repairs or cleaning needed before listing." },
+    "donation":      { "score_min": 20, "score_max": 39,  "rationale": "Not resaleable but still usable. Routed to NGO partners." },
+    "recycling":     { "score_min": 0,  "score_max": 19,  "rationale": "Product unusable. Material recovery only." }
+  },
+
+  "discount_calculation": "midpoint",
+
+  "writeoff_value_avoided_formula": {
+    "formula": "round(original_price_inr * 0.15)",
+    "applies_to": "return",
+    "rationale": "For a returned item, Amazon's standard practice is to write off ~15% of its original value as unsellable/liquidation loss. Reselling it via Second Life recovers that 15% instead of writing it off. A voluntary listing (Entry Point B) was never Amazon inventory, so there was nothing to write off — writeoff_value_avoided_inr is 0 for second_life_listing transactions."
+  },
+
+  "transaction_types": {
+    "_comment": "Every transaction in transactions.json is one of these two types. The type determines which cost-saving fields are non-zero — this is the basis of the 'self-funding' claim.",
+
+    "return": {
+      "entry_point": "A — customer returns an item, AI grades it, it's routed to Second Life instead of the standard return pipeline",
+      "how_to_identify": "condition is 'Good' or 'Acceptable' (an item with visible wear came from real use, i.e. it was actually owned and returned, not a never-opened voluntary listing)",
+      "applicable_fields": {
+        "logistics_cost_saved_inr": "180 — the reverse-logistics chain (pickup, warehouse intake, QC, liquidation) that a normal return would trigger is avoided",
+        "carbon_kg_saved": "0.12 — reselling avoids manufacturing a replacement unit",
+        "writeoff_value_avoided_inr": "round(original_price * 0.15) — see writeoff_value_avoided_formula above",
+        "seller_recovery_inr": "value recovered for the customer (faster refund / partial credit) instead of a written-off return"
+      },
+      "_self_funding_claim": "This is the entry point the 'self-funding' pitch rests on. Amazon ALREADY pays for return logistics on every one of these items — Second Life redirects that existing spend instead of adding new spend. The cost savings here are real, immediate, and don't depend on any new infrastructure."
+    },
+
+    "second_life_listing": {
+      "entry_point": "B — customer voluntarily lists an item they own via 'Give it a Second Life'. The item never enters Amazon's reverse-logistics pipeline.",
+      "how_to_identify": "condition is 'Like New' (an item in pristine condition that nobody returned — it was sitting unused in someone's home)",
+      "applicable_fields": {
+        "logistics_cost_saved_inr": "0 — Amazon was never going to spend anything processing this item, so there's nothing to 'save' relative to a baseline",
+        "carbon_kg_saved": "0.12 — still applies. Reselling this item avoids manufacturing a replacement unit, same as a return-based resale",
+        "writeoff_value_avoided_inr": "0 — Amazon never owned this item, so there was never a write-off to avoid",
+        "seller_recovery_inr": "cash paid to the seller for their listed item"
+      },
+      "_framing": "This entry point is NOT part of the self-funding claim — it's pure incremental upside. Frame it to judges as: 'On top of a program that already pays for itself through returns, every voluntary listing adds seller income and carbon savings at zero additional cost to Amazon.'"
+    }
+  },
+
+  "_dashboard_math_v3": {
+    "_comment": "How Screen 10 (business impact dashboard) should compute its headline numbers from transactions_v3.json. Replaces the old 'multiply everything by 50' approach.",
+    "self_funding_savings_inr": "SUM(logistics_cost_saved_inr) + SUM(writeoff_value_avoided_inr) across transaction_type=='return' only",
+    "total_carbon_saved_kg": "SUM(carbon_kg_saved) across ALL transactions (both types)",
+    "total_seller_recovery_inr": "SUM(seller_recovery_inr) across ALL transactions (both types)",
+    "headline_for_50_pilot_transactions": {
+      "returns": "31 of 50 transactions are return-based -> Rs 5,580 logistics saved + Rs 3,020 writeoff avoided = Rs 8,600 in direct, existing-budget cost avoidance",
+      "voluntary_listings": "19 of 50 transactions are voluntary listings -> Rs 6,361 in additional seller recovery, at zero additional cost to Amazon",
+      "carbon": "6.0 kg CO2 avoided across all 50 transactions",
+      "pitch_line": "Even counting only the 31 returns, the program covers Rs 8,600 in costs Amazon is already paying. The 19 voluntary listings are pure upside on top of that."
+    }
+  },
+
+  "_future_considerations": {
+    "_comment": "Raised during planning but explicitly OUT OF SCOPE for the hackathon prototype. Documented so it isn't lost, and so judges' questions about it can be answered with 'here's our plan' rather than 'we haven't thought about it'.",
+
+    "dynamic_discount_tied_to_logistics_savings": {
+      "the_idea": "Instead of a fixed discount_midpoint per condition tier, the discount could be partly funded by the logistics_cost_saved_inr for that specific transaction — e.g. pass some fraction of the Rs 180 saved back to the buyer as extra discount, framing the price cut as 'funded by Amazon's own savings' rather than just a markdown.",
+      "why_not_now": "There's no clean way to SHOW this distinction in a working prototype within the hackathon timeframe — the displayed price would be identical either way, and explaining 'this 30% is partly funded by logistics savings' requires either a breakdown UI nobody has time to build, or just becomes a verbal claim with no visual backing.",
+      "for_now": "Use fixed discount_midpoint values from condition_tiers (15/18/30/45 as applicable). The self-funding claim is made at the DASHBOARD level (Screen 10, aggregate savings across all transactions), not at the per-listing price level. This is honest, simple, and fully demonstrable.",
+      "if_revisited": "A v2 version could show a 'price breakdown' on the product detail page: 'Original price - standard discount - logistics savings passback = final price'. Worth prototyping as a static mockup screen even if not wired to real logic, IF there's spare time after the core loop is solid."
+    }
+  },
+
+  "logistics_cost_saved_per_transaction_inr": 180,
+  "carbon_kg_saved_per_transaction": 0.12
+}

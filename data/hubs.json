@@ -1,0 +1,29 @@
+[
+  {
+    "hub_id": "H001",
+    "name": "Amazon Fulfillment Center — Bhiwandi",
+    "address": "Plot No. 23, MIDC Industrial Area, Bhiwandi, Maharashtra 421302",
+    "lat": 19.2967,
+    "lng": 73.0579,
+    "city": "Mumbai",
+    "coverage_pincodes": ["421302", "421301", "421303", "400601", "400607"]
+  },
+  {
+    "hub_id": "H002",
+    "name": "Amazon Sortation Center — Turbhe",
+    "address": "Plot No. 7, Sector 19, Turbhe MIDC, Navi Mumbai 400705",
+    "lat": 19.0748,
+    "lng": 73.0130,
+    "city": "Mumbai",
+    "coverage_pincodes": ["400705", "400706", "400614", "400703", "400709"]
+  },
+  {
+    "hub_id": "H003",
+    "name": "Amazon Delivery Station — Andheri",
+    "address": "Unit 4B, Chakala Industrial Estate, Andheri East, Mumbai 400093",
+    "lat": 19.1136,
+    "lng": 72.8697,
+    "city": "Mumbai",
+    "coverage_pincodes": ["400053", "400059", "400069", "400070", "400093", "400064", "400099"]
+  }
+]
