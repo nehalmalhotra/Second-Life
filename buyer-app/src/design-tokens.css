@@ -1,0 +1,46 @@
+/*
+ * Amazon Second Life — Design Tokens
+ * Shared across all apps (buyer-app, frontend).
+ * Import this file at the top of each app's globals.css.
+ *
+ * Usage in Tailwind v4 classes:
+ *   bg-amazon-header, text-amazon-link, bg-amazon-button-primary, etc.
+ *   font-amazon (for the font-family)
+ *   rounded-card, shadow-card
+ */
+
+@theme {
+  /* ─── Colors ─────────────────────────────────────────── */
+
+  /* Core layout */
+  --color-amazon-header: #131921;
+  --color-amazon-secondary-nav: #232F3E;
+  --color-amazon-page-bg: #EAEDED;
+  --color-amazon-card: #FFFFFF;
+  --color-amazon-card-border: #D5D9D9;
+
+  /* Buttons */
+  --color-amazon-button-primary: #FFD814;
+  --color-amazon-button-primary-hover: #F7CA00;
+
+  /* Accents */
+  --color-amazon-orange: #FEBD69;
+  --color-amazon-link: #007185;
+  --color-amazon-price: #B12704;
+  --color-amazon-savings: #007600;
+
+  /* Text */
+  --color-amazon-text: #0F1111;
+
+  /* Second Life brand accent (existing orange identity) */
+  --color-secondlife: #FF9900;
+
+  /* ─── Font Family ────────────────────────────────────── */
+  --font-amazon: Arial, "Helvetica Neue", Helvetica, sans-serif;
+
+  /* ─── Border Radius ──────────────────────────────────── */
+  --radius-card: 8px;
+
+  /* ─── Shadows ────────────────────────────────────────── */
+  --shadow-card: 0 1px 4px rgba(0, 0, 0, 0.12);
+}

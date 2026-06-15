@@ -3,7 +3,6 @@
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import Navbar from '@/components/Navbar'
 import ConditionBadge from '@/components/ConditionBadge'
 import { analyzeProduct, generateListing, matchBuyers, notifyBuyer } from '@/services/api'
 import type { AnalyzeResponse, Listing } from '@/types'
@@ -12,6 +11,7 @@ type Step = 'upload' | 'loading' | 'result' | 'not_eligible' | 'confirmed'
 
 export let globalListing: Listing | null = null
 export let globalAnalyzeResult: AnalyzeResponse | null = null
+export let globalCustomerPhoto: string | null = null
 
 const LOADING_MESSAGES = [
   'Uploading your photos...',
@@ -66,7 +66,11 @@ export default function UploadPage({
   
     setPreviews(prev => {
       const next = [...prev]
-      next[index] = URL.createObjectURL(file)
+      next[index] = url
+      // Persist the first uploaded photo globally for the verify page
+      if (!globalCustomerPhoto || index === 0) {
+        globalCustomerPhoto = next.find(p => p !== '') || null
+      }
       return next
     })
   
@@ -139,7 +143,6 @@ export default function UploadPage({
 
   return (
     <div style={{ minHeight: '100vh', background: '#F3F3F3' }}>
-      <Navbar />
       <div style={{ maxWidth: '480px', margin: '0 auto', padding: '24px 16px' }}>
 
         {/* Return flow banner */}

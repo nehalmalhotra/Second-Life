@@ -18,102 +18,109 @@ export default function ListingCard({ listing, isHighlighted = false, onClick }:
     <div
       onClick={onClick}
       style={{
-        background: '#FFFFFF',
-        border: isHighlighted ? '2px solid #067D62' : '1px solid #DDDDDD',
-        borderRadius: '12px',
-        padding: '16px',
-        marginBottom: '12px',
+        background: 'var(--color-amazon-card)',
+        border: isHighlighted
+          ? '2px solid var(--color-secondlife)'
+          : '1px solid var(--color-amazon-card-border)',
+        borderRadius: 'var(--radius-card)',
         boxShadow: isHighlighted
-          ? '0 0 0 4px rgba(6,125,98,0.12)'
-          : '0 1px 3px rgba(0,0,0,0.08)',
+          ? '0 0 0 3px rgba(255,153,0,0.15)'
+          : 'var(--shadow-card)',
+        padding: '16px',
         cursor: onClick ? 'pointer' : 'default',
-        transition: 'all 0.3s ease',
+        transition: 'border-color 0.2s, box-shadow 0.2s',
+        display: 'flex',
+        gap: '16px',
       }}
     >
-      <div style={{ display: 'flex', gap: '14px' }}>
-        {/* Product image placeholder */}
-        <div style={{
-          width: '72px',
-          height: '72px',
-          background: '#F3F3F3',
-          borderRadius: '8px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '32px',
-          flexShrink: 0,
+      {/* Square product image area */}
+      <div style={{
+        width: '140px',
+        height: '140px',
+        background: '#F7F7F7',
+        borderRadius: '4px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '48px',
+        flexShrink: 0,
+      }}>
+        {productEmoji[listing.product_id] ?? '📦'}
+      </div>
+
+      {/* Details */}
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        {/* Title — teal, Amazon style */}
+        <p style={{
+          fontSize: '14px',
+          fontWeight: 400,
+          color: 'var(--color-amazon-link)',
+          lineHeight: 1.4,
+          fontFamily: 'var(--font-amazon)',
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
         }}>
-          {productEmoji[listing.product_id] ?? '📦'}
+          {listing.listing_title.split(' — ')[0]}
+        </p>
+
+        {/* Condition badge */}
+        <div style={{ marginTop: '2px' }}>
+          <ConditionBadge condition={listing.condition_badge} size="sm" />
         </div>
 
-        <div style={{ flex: 1, minWidth: 0 }}>
-          {/* Title + badge row */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
-            <p style={{
-              fontSize: '13px', fontWeight: 600, color: '#111111',
-              lineHeight: '1.3', flex: 1,
-            }}>
-              {listing.listing_title.split(' — ')[0]}
-            </p>
-          </div>
-
-          <div style={{ marginBottom: '6px' }}>
-            <ConditionBadge condition={listing.condition_badge} size="sm" />
-          </div>
-
-          {/* AI description truncated */}
-          <p style={{
-            fontSize: '11px', color: '#555555', lineHeight: '1.4',
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-            marginBottom: '8px',
-          }}>
-            {listing.ai_description}
-          </p>
-
-          {/* Price row */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-            <div>
-              <span style={{ fontSize: '10px', color: '#999999', textDecoration: 'line-through' }}>
-                ₹{listing.original_price.toLocaleString()}
-              </span>
-              <span style={{ fontSize: '18px', fontWeight: 700, color: '#111111', marginLeft: '6px' }}>
-                ₹{listing.discounted_price.toLocaleString()}
-              </span>
-              <span style={{ fontSize: '11px', color: '#067D62', fontWeight: 600, marginLeft: '6px' }}>
-                {listing.discount_percent}% off
-              </span>
-            </div>
-          </div>
-
-          {/* Tags row */}
-          <div style={{ display: 'flex', gap: '6px', marginTop: '8px', flexWrap: 'wrap' }}>
-            {listing.amazon_verified && (
-              <span style={{
-                fontSize: '10px', color: '#067D62', fontWeight: 600,
-                background: '#E6F4EA', padding: '2px 8px', borderRadius: '100px',
-              }}>
-                ✓ Amazon Verified
-              </span>
-            )}
-            <span style={{
-              fontSize: '10px', color: '#1A56A0', fontWeight: 600,
-              background: '#E8F0FE', padding: '2px 8px', borderRadius: '100px',
-            }}>
-              📦 {listing.estimated_delivery}
+        {/* Price block */}
+        <div style={{ marginTop: '6px' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '20px', fontWeight: 400, color: 'var(--color-amazon-text)', fontFamily: 'var(--font-amazon)' }}>
+              ₹{listing.discounted_price.toLocaleString()}
             </span>
-            {listing.return_reason_display === null && (
-              <span style={{
-                fontSize: '10px', color: '#555555',
-                background: '#F3F3F3', padding: '2px 8px', borderRadius: '100px',
-              }}>
-                Listed by owner
-              </span>
-            )}
+            <span style={{ fontSize: '12px', color: '#565959', textDecoration: 'line-through' }}>
+              M.R.P.: ₹{listing.original_price.toLocaleString()}
+            </span>
+            <span style={{ fontSize: '12px', color: 'var(--color-amazon-price)', fontWeight: 400 }}>
+              ({listing.discount_percent}% off)
+            </span>
           </div>
         </div>
+
+        {/* Badges row */}
+        <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+          {listing.amazon_verified && (
+            <span style={{
+              fontSize: '11px',
+              color: 'var(--color-amazon-savings)',
+              fontWeight: 600,
+              fontFamily: 'var(--font-amazon)',
+            }}>
+              ✓ Amazon Verified
+            </span>
+          )}
+          <span style={{
+            fontSize: '11px',
+            color: 'var(--color-amazon-savings)',
+            fontWeight: 600,
+            fontFamily: 'var(--font-amazon)',
+          }}>
+            📦 {listing.estimated_delivery}
+          </span>
+        </div>
+
+        {/* AI summary */}
+        <p style={{
+          fontSize: '12px',
+          color: '#565959',
+          lineHeight: 1.4,
+          marginTop: '6px',
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+          fontFamily: 'var(--font-amazon)',
+        }}>
+          {listing.ai_description}
+        </p>
       </div>
     </div>
   )

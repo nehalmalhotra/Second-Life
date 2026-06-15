@@ -1,10 +1,9 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import Navbar from '@/components/Navbar';
 import { comparePhotos, matchBuyers, notifyBuyer } from '@/services/api';
-import { globalListing } from '../upload/page';
+import { globalListing, globalCustomerPhoto } from '../upload/page';
 import products from '@/data/product.json';
 import type { Listing } from '@/types';
 
@@ -26,6 +25,9 @@ export default function VerifyPage() {
   const [score, setScore] = useState(0);
   const [error, setError] = useState('');
   const [listingReady, setListingReady] = useState(false);
+  const [customerPhoto, setCustomerPhoto] = useState<string | null>(null);
+  const [driverPhoto, setDriverPhoto] = useState<string | null>(null);
+  const driverInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!globalListing) {
@@ -35,7 +37,16 @@ export default function VerifyPage() {
     }
     setListingReady(true);
     setError('');
+    // Load the customer photo from the upload flow
+    setCustomerPhoto(globalCustomerPhoto);
   }, []);
+
+  const handleDriverPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    setDriverPhoto(url);
+  };
 
   const handleVerify = async () => {
     if (!globalListing) {
@@ -85,11 +96,10 @@ export default function VerifyPage() {
         listing.hub_id
       )) as MatchBuyersResponse;
 
-
       const topBuyer = matchRes.matches?.[0];
 
-console.log("MATCH RESPONSE", matchRes);
-console.log("TOP BUYER", topBuyer);
+      console.log("MATCH RESPONSE", matchRes);
+      console.log("TOP BUYER", topBuyer);
       if (topBuyer) {
         await notifyBuyer(topBuyer.buyer_id, listing);
       }
@@ -102,7 +112,6 @@ console.log("TOP BUYER", topBuyer);
 
   return (
     <div style={{ minHeight: '100vh', background: '#F3F3F3' }}>
-      <Navbar />
       <div style={{ maxWidth: '480px', margin: '0 auto', padding: '24px 16px' }}>
 
         <h1 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '6px' }}>
@@ -144,7 +153,7 @@ console.log("TOP BUYER", topBuyer);
           </div>
         )}
 
-        {/* Two photo panels — always visible */}
+        {/* Two photo panels */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
           {/* Customer photo */}
           <div style={{
@@ -170,11 +179,25 @@ console.log("TOP BUYER", topBuyer);
               alignItems: 'center',
               justifyContent: 'center',
               position: 'relative',
+              overflow: 'hidden',
             }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '40px', marginBottom: '8px' }}>🔊</div>
-                <span style={{ fontSize: '10px', color: '#999999' }}>Front view</span>
-              </div>
+              {customerPhoto ? (
+                <img
+                  src={customerPhoto}
+                  alt="Customer submission"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain',
+                    padding: '8px',
+                  }}
+                />
+              ) : (
+                <div style={{ textAlign: 'center', color: '#999999' }}>
+                  <div style={{ fontSize: '40px', marginBottom: '8px' }}>📷</div>
+                  <span style={{ fontSize: '10px' }}>No photo available</span>
+                </div>
+              )}
 
               {step === 'scanning' && (
                 <motion.div
@@ -217,11 +240,54 @@ console.log("TOP BUYER", topBuyer);
               alignItems: 'center',
               justifyContent: 'center',
               position: 'relative',
+              overflow: 'hidden',
             }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '40px', marginBottom: '8px' }}>🔊</div>
-                <span style={{ fontSize: '10px', color: '#999999' }}>Side view</span>
-              </div>
+              {driverPhoto ? (
+                <img
+                  src={driverPhoto}
+                  alt="Driver photo"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain',
+                    padding: '8px',
+                  }}
+                />
+              ) : (
+                <div style={{ textAlign: 'center' }}>
+                  <input
+                    ref={driverInputRef}
+                    type="file"
+                    accept=".png,.jpg,.jpeg"
+                    style={{ display: 'none' }}
+                    onChange={handleDriverPhotoChange}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => driverInputRef.current?.click()}
+                    style={{
+                      background: '#FF9900',
+                      color: '#111111',
+                      border: 'none',
+                      borderRadius: '6px',
+                      padding: '10px 16px',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '6px',
+                    }}
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="2">
+                      <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                      <circle cx="12" cy="13" r="4"/>
+                    </svg>
+                    Upload Driver Photo
+                  </button>
+                </div>
+              )}
 
               {step === 'scanning' && (
                 <motion.div

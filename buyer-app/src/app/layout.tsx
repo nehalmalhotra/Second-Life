@@ -1,4 +1,13 @@
 import './globals.css'
+import AmazonChrome from '@/components/AmazonChrome'
+import NotificationPoller from '@/components/NotificationPoller'
+import TitleManager from '@/components/TitleManager'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Online Shopping',
+  icons: { icon: '/favicon.ico' },
+}
 
 export default function RootLayout({
   children,
@@ -7,7 +16,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <TitleManager />
+        <AmazonChrome />
+        <NotificationPoller />
+        <div style={{ paddingTop: '98px' }}>{children}</div>
+      </body>
     </html>
   )
 }

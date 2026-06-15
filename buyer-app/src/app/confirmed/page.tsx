@@ -2,180 +2,182 @@
 
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import Navbar from '@/components/Navbar'
 import { RAHUL_LISTING, ASHISH } from '@/data/mockData'
 
 export default function ConfirmedPage() {
   const router = useRouter()
   const listing = RAHUL_LISTING
-  const today = new Date()
+  const savings = listing.original_price - listing.discounted_price
   const deliveryTime = '8:00 PM'
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F3F3F3' }}>
-      <Navbar />
+    <div style={{ minHeight: '100vh', background: 'var(--color-amazon-page-bg)', fontFamily: 'var(--font-amazon)' }}>
+      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '24px 16px' }}>
 
-      <div style={{ maxWidth: '480px', margin: '0 auto', padding: '40px 16px' }}>
-
-        {/* Green check animation */}
+        {/* Success banner */}
         <motion.div
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
           style={{
-            width: '96px', height: '96px',
-            background: '#E6F4EA',
-            border: '3px solid #067D62',
-            borderRadius: '50%',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto 24px',
-            fontSize: '48px',
+            background: 'var(--color-amazon-card)',
+            border: '1px solid var(--color-amazon-card-border)',
+            borderRadius: 'var(--radius-card)',
+            padding: '24px',
+            marginBottom: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '20px',
           }}
         >
-          ✓
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+            style={{
+              width: '64px', height: '64px',
+              background: '#E6F4EA',
+              border: '3px solid var(--color-amazon-savings)',
+              borderRadius: '50%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '28px',
+              fontWeight: 700,
+              color: 'var(--color-amazon-savings)',
+              flexShrink: 0,
+            }}
+          >
+            ✓
+          </motion.div>
+          <div>
+            <h1 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--color-amazon-savings)', marginBottom: '4px' }}>
+              Order placed, thank you!
+            </h1>
+            <p style={{ fontSize: '14px', color: '#565959' }}>
+              Confirmation will be sent to {ASHISH.name}&apos;s email.
+            </p>
+          </div>
         </motion.div>
 
+        {/* Delivery card */}
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.4 }}
-          style={{ textAlign: 'center', marginBottom: '32px' }}
-        >
-          <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#1A7340', marginBottom: '8px' }}>
-            Order Confirmed!
-          </h1>
-          <p style={{ fontSize: '14px', color: '#555555' }}>
-            Thank you, {ASHISH.name}. Your order is on its way.
-          </p>
-        </motion.div>
-
-        {/* Order summary */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.4 }}
+          transition={{ delay: 0.15, duration: 0.3 }}
           style={{
-            background: '#FFFFFF',
-            border: '1px solid #DDDDDD',
-            borderRadius: '12px',
+            background: 'var(--color-amazon-card)',
+            border: '1px solid var(--color-amazon-card-border)',
+            borderRadius: 'var(--radius-card)',
             padding: '20px',
             marginBottom: '16px',
           }}
         >
-          <div style={{ display: 'flex', gap: '14px', marginBottom: '16px' }}>
+          <p style={{ fontSize: '15px', fontWeight: 700, color: 'var(--color-amazon-savings)', marginBottom: '8px' }}>
+            Arriving today by {deliveryTime}
+          </p>
+
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
             <div style={{
-              width: '56px', height: '56px',
-              background: '#F3F3F3', borderRadius: '8px',
+              width: '72px', height: '72px',
+              background: '#F7F7F7',
+              borderRadius: '4px',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '28px', flexShrink: 0,
+              fontSize: '36px',
+              flexShrink: 0,
             }}>
               🔊
             </div>
             <div>
-              <p style={{ fontSize: '14px', fontWeight: 600, color: '#111111', marginBottom: '4px' }}>
+              <p style={{ fontSize: '14px', fontWeight: 400, color: 'var(--color-amazon-link)', marginBottom: '4px' }}>
                 boAt Aavante Bar 490 Bluetooth Speaker
               </p>
-              <p style={{ fontSize: '12px', color: '#555555' }}>
+              <p style={{ fontSize: '12px', color: '#565959' }}>
                 Condition: Like New · Amazon Verified
+              </p>
+              <p style={{ fontSize: '12px', color: '#565959', marginTop: '4px' }}>
+                From Bhiwandi hub · Amazon Second Life
               </p>
             </div>
           </div>
 
-          <div style={{ borderTop: '1px solid #F3F3F3', paddingTop: '14px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-              <span style={{ fontSize: '13px', color: '#555555' }}>Amount paid</span>
-              <span style={{ fontSize: '15px', fontWeight: 700, color: '#111111' }}>
-                ₹{listing.discounted_price.toLocaleString()}
-              </span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-              <span style={{ fontSize: '13px', color: '#555555' }}>You saved</span>
-              <span style={{ fontSize: '13px', fontWeight: 600, color: '#067D62' }}>
-                ₹{(listing.original_price - listing.discounted_price).toLocaleString()} ({listing.discount_percent}% off)
-              </span>
+          <div style={{ borderTop: '1px solid var(--color-amazon-card-border)', marginTop: '16px', paddingTop: '12px' }}>
+            <p style={{ fontSize: '13px', color: '#565959' }}>
+              Delivering to: <strong style={{ color: 'var(--color-amazon-text)' }}>{ASHISH.location}</strong>
+            </p>
+          </div>
+        </motion.div>
+
+        {/* Order summary */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25, duration: 0.3 }}
+          style={{
+            background: 'var(--color-amazon-card)',
+            border: '1px solid var(--color-amazon-card-border)',
+            borderRadius: 'var(--radius-card)',
+            padding: '20px',
+            marginBottom: '16px',
+          }}
+        >
+          <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--color-amazon-text)', marginBottom: '14px' }}>
+            Order Summary
+          </h2>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '13px', color: '#565959' }}>Items:</span>
+              <span style={{ fontSize: '13px', color: 'var(--color-amazon-text)' }}>₹{listing.discounted_price.toLocaleString()}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '13px', color: '#555555' }}>Payment</span>
-              <span style={{ fontSize: '13px', color: '#111111' }}>Amazon Pay</span>
+              <span style={{ fontSize: '13px', color: '#565959' }}>Delivery:</span>
+              <span style={{ fontSize: '13px', color: 'var(--color-amazon-text)' }}>₹0.00</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '13px', color: '#565959' }}>You saved:</span>
+              <span style={{ fontSize: '13px', color: 'var(--color-amazon-savings)', fontWeight: 600 }}>
+                -₹{savings.toLocaleString()} ({listing.discount_percent}% off)
+              </span>
+            </div>
+            <hr style={{ border: 'none', borderTop: '1px solid var(--color-amazon-card-border)', margin: '4px 0' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '15px', fontWeight: 700, color: 'var(--color-amazon-price)' }}>Order Total:</span>
+              <span style={{ fontSize: '15px', fontWeight: 700, color: 'var(--color-amazon-price)' }}>₹{listing.discounted_price.toLocaleString()}</span>
             </div>
           </div>
-        </motion.div>
 
-        {/* Delivery info */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.4 }}
-          style={{
-            background: '#E6F4EA',
-            border: '1px solid #A8D5B5',
-            borderRadius: '12px',
-            padding: '16px',
-            marginBottom: '16px',
-            display: 'flex',
-            gap: '14px',
-            alignItems: 'center',
-          }}
-        >
-          <span style={{ fontSize: '32px', flexShrink: 0 }}>🚚</span>
-          <div>
-            <p style={{ fontSize: '14px', fontWeight: 700, color: '#1A7340', marginBottom: '2px' }}>
-              Estimated Delivery: Today by {deliveryTime}
-            </p>
-            <p style={{ fontSize: '12px', color: '#555555' }}>
-              Delivering to {ASHISH.location}
-            </p>
-            <p style={{ fontSize: '12px', color: '#555555' }}>
-              From Bhiwandi hub · Amazon Second Life
-            </p>
+          {/* Payment method */}
+          <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid var(--color-amazon-card-border)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '16px' }}>🔒</span>
+            <span style={{ fontSize: '13px', color: 'var(--color-amazon-text)' }}>
+              Paid via <strong>Amazon Pay</strong>
+            </span>
           </div>
         </motion.div>
 
-        {/* Amazon Pay logo */}
+        {/* Continue shopping button */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
-          style={{
-            background: '#FFFFFF',
-            border: '1px solid #DDDDDD',
-            borderRadius: '12px',
-            padding: '14px',
-            marginBottom: '24px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '10px',
-          }}
+          transition={{ delay: 0.35 }}
+          style={{ textAlign: 'center' }}
         >
-          <span style={{ fontSize: '20px' }}>🔒</span>
-          <span style={{ fontSize: '14px', fontWeight: 600, color: '#131921' }}>
-            amazon <span style={{ color: '#FF9900' }}>Pay</span>
-          </span>
-          <span style={{ fontSize: '12px', color: '#555555' }}>· Payment secured</span>
+          <button
+            onClick={() => router.push('/marketplace')}
+            style={{
+              padding: '10px 28px',
+              background: 'var(--color-amazon-button-primary)',
+              border: '1px solid #C8A600',
+              borderRadius: '20px',
+              fontSize: '14px',
+              fontWeight: 400,
+              color: 'var(--color-amazon-text)',
+              cursor: 'pointer',
+              fontFamily: 'var(--font-amazon)',
+            }}
+          >
+            Continue Shopping
+          </button>
         </motion.div>
-
-        {/* View order button */}
-        <motion.button
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.65 }}
-          onClick={() => router.push('/marketplace')}
-          style={{
-            width: '100%',
-            padding: '14px',
-            background: '#FF9900',
-            color: '#111111',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '15px',
-            fontWeight: 700,
-            cursor: 'pointer',
-            marginBottom: '12px',
-          }}
-        >
-          Continue Shopping
-        </motion.button>
 
       </div>
     </div>

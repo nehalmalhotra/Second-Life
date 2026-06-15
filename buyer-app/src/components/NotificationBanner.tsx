@@ -17,7 +17,7 @@ export default function NotificationBanner({ notification, onTap }: Props) {
       onClick={onTap}
       style={{
         position: 'fixed',
-        top: '68px',
+        top: '106px',
         left: '50%',
         transform: 'translateX(-50%)',
         width: 'calc(100% - 32px)',

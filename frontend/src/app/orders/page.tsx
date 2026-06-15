@@ -1,14 +1,12 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import Navbar from '@/components/Navbar'
 
 export default function OrdersPage() {
   const router = useRouter()
 
   return (
     <div style={{ minHeight: '100vh', background: '#F3F3F3' }}>
-      <Navbar />
       <div style={{ maxWidth: '480px', margin: '0 auto', padding: '24px 16px' }}>
 
         <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#111111', marginBottom: '24px' }}>

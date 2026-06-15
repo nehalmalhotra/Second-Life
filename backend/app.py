@@ -333,5 +333,12 @@ def notify(payload: dict = Body(...)):
 
 @app.get("/notify-status/{buyer_id}")
 def notify_status(buyer_id: str):
-    note = PENDING_NOTIFICATIONS.pop(buyer_id, None)
+    note = PENDING_NOTIFICATIONS.get(buyer_id, None)
     return {"success": True, "notification": note}  # note is None when nothing pending
+
+
+@app.post("/notify-ack/{buyer_id}")
+def notify_ack(buyer_id: str):
+    """Acknowledge (consume) the notification after the buyer has seen it."""
+    PENDING_NOTIFICATIONS.pop(buyer_id, None)
+    return {"success": True}
