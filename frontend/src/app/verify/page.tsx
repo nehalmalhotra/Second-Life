@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -27,6 +27,7 @@ export default function VerifyPage() {
   const [listingReady, setListingReady] = useState(false);
   const [customerPhoto, setCustomerPhoto] = useState<string | null>(null);
   const [driverPhoto, setDriverPhoto] = useState<string | null>(null);
+  const [noteText, setNoteText] = useState('');
   const driverInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -37,7 +38,6 @@ export default function VerifyPage() {
     }
     setListingReady(true);
     setError('');
-    // Load the customer photo from the upload flow
     setCustomerPhoto(globalCustomerPhoto);
   }, []);
 
@@ -109,6 +109,7 @@ export default function VerifyPage() {
   };
 
   const verifiedBorder = step === 'verified';
+  const currentDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
   return (
     <div style={{ minHeight: '100vh', background: '#F3F3F3' }}>
@@ -153,9 +154,7 @@ export default function VerifyPage() {
           </div>
         )}
 
-        {/* Two photo panels */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
-          {/* Customer photo */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
           <div style={{
             background: '#FFFFFF',
             border: verifiedBorder ? '2px solid #067D62' : '1px solid #DDDDDD',
@@ -163,13 +162,9 @@ export default function VerifyPage() {
             overflow: 'hidden',
             transition: 'border 0.4s',
           }}>
-            <div style={{
-              background: '#232F3E',
-              padding: '8px',
-              textAlign: 'center',
-            }}>
+            <div style={{ background: '#232F3E', padding: '8px', textAlign: 'center' }}>
               <span style={{ fontSize: '11px', color: '#FFFFFF', fontWeight: 600 }}>
-                Customer Submission
+                Seller's Submission
               </span>
             </div>
             <div style={{
@@ -184,13 +179,8 @@ export default function VerifyPage() {
               {customerPhoto ? (
                 <img
                   src={customerPhoto}
-                  alt="Customer submission"
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'contain',
-                    padding: '8px',
-                  }}
+                  alt="Seller submission"
+                  style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '8px' }}
                 />
               ) : (
                 <div style={{ textAlign: 'center', color: '#999999' }}>
@@ -216,7 +206,6 @@ export default function VerifyPage() {
             </div>
           </div>
 
-          {/* Driver photo */}
           <div style={{
             background: '#FFFFFF',
             border: verifiedBorder ? '2px solid #067D62' : '1px solid #DDDDDD',
@@ -224,13 +213,9 @@ export default function VerifyPage() {
             overflow: 'hidden',
             transition: 'border 0.4s',
           }}>
-            <div style={{
-              background: '#37475A',
-              padding: '8px',
-              textAlign: 'center',
-            }}>
+            <div style={{ background: '#232F3E', padding: '8px', textAlign: 'center' }}>
               <span style={{ fontSize: '11px', color: '#FFFFFF', fontWeight: 600 }}>
-                Driver Photo at Pickup
+                Pickup Associate's Photo
               </span>
             </div>
             <div style={{
@@ -245,13 +230,8 @@ export default function VerifyPage() {
               {driverPhoto ? (
                 <img
                   src={driverPhoto}
-                  alt="Driver photo"
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'contain',
-                    padding: '8px',
-                  }}
+                  alt="Pickup associate photo"
+                  style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '8px' }}
                 />
               ) : (
                 <div style={{ textAlign: 'center' }}>
@@ -274,16 +254,8 @@ export default function VerifyPage() {
                       fontSize: '12px',
                       fontWeight: 700,
                       cursor: 'pointer',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: '6px',
                     }}
                   >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="2">
-                      <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
-                      <circle cx="12" cy="13" r="4"/>
-                    </svg>
                     Upload Driver Photo
                   </button>
                 </div>
@@ -305,6 +277,26 @@ export default function VerifyPage() {
               )}
             </div>
           </div>
+        </div>
+
+        <div style={{ marginBottom: '24px' }}>
+          <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#111111', marginBottom: 8 }}>
+            Pickup associate notes (optional)
+          </label>
+          <input
+            value={noteText}
+            onChange={(event) => setNoteText(event.target.value)}
+            placeholder="e.g. Minor scuff on base, unit powers on and tested"
+            style={{
+              width: '100%',
+              padding: '8px',
+              border: '1px solid #DDD',
+              borderRadius: 6,
+              background: '#F8F8F8',
+              color: '#111111',
+              fontSize: 13,
+            }}
+          />
         </div>
 
         {step === 'idle' && (
@@ -383,71 +375,57 @@ export default function VerifyPage() {
             >
               <div style={{
                 background: '#FFFFFF',
-                border: '1px solid #DDDDDD',
+                border: '1px solid #A8D5B5',
                 borderRadius: '12px',
                 padding: '20px',
-                textAlign: 'center',
                 marginBottom: '16px',
               }}>
-                <div style={{ fontSize: '48px', fontWeight: 700, color: '#067D62' }}>
-                  {score}%
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                  <span style={{ color: '#067D62', fontSize: 18 }}>🛡</span>
+                  <span style={{ color: '#111111', fontSize: 16, fontWeight: 700 }}>
+                    Amazon Verified · Second Life
+                  </span>
                 </div>
-                <p style={{ fontSize: '13px', color: '#555555' }}>Consistency Score</p>
+                <div style={{ height: '1px', background: '#F3F3F3', margin: '0 -20px 16px' }} />
 
-                <div style={{
-                  height: '6px',
-                  background: '#DDDDDD',
-                  borderRadius: '100px',
-                  overflow: 'hidden',
-                  marginTop: '12px',
-                }}>
-                  <div style={{
-                    height: '100%',
-                    background: '#067D62',
-                    borderRadius: '100px',
-                    width: `${score}%`,
-                    transition: 'width 0.5s ease',
-                  }} />
+                <div style={{ display: 'grid', gap: 10, marginBottom: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, color: '#111111', fontSize: 13 }}>
+                    <span style={{ color: '#067D62', lineHeight: 1.2 }}>✓</span>
+                    <span>Seller submission received</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, color: '#111111', fontSize: 13 }}>
+                    <span style={{ color: '#067D62', lineHeight: 1.2 }}>✓</span>
+                    <span>Pickup associate photo captured</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, color: '#111111', fontSize: 13 }}>
+                    <span style={{ color: '#067D62', lineHeight: 1.2 }}>✓</span>
+                    <span>AI consistency score: 91% — condition confirmed</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, color: '#111111', fontSize: 13 }}>
+                    <span style={{ color: '#067D62', lineHeight: 1.2 }}>✓</span>
+                    <span>Verdict: Product matches seller description</span>
+                  </div>
+                </div>
+
+                {noteText && (
+                  <div style={{ fontSize: 12, color: '#555555', fontStyle: 'italic', marginBottom: 12 }}>
+                    Associate note: {noteText}
+                  </div>
+                )}
+
+                <div style={{ color: '#999999', fontSize: 11 }}>
+                  Listing activated · Verified by Amazon · {currentDate}
                 </div>
               </div>
-
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
-                style={{
-                  background: '#E6F4EA',
-                  border: '2px solid #067D62',
-                  borderRadius: '12px',
-                  padding: '20px',
-                  textAlign: 'center',
-                  marginBottom: '16px',
-                }}
-              >
-                <div style={{ fontSize: '36px', marginBottom: '8px' }}>✅</div>
-                <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#1A7340', marginBottom: '6px' }}>
-                  Amazon Verified
-                </h2>
-                <p style={{ fontSize: '13px', color: '#555555', marginBottom: '4px' }}>
-                  Two-point verification complete.
-                </p>
-                <p style={{ fontSize: '13px', color: '#555555', marginBottom: '4px' }}>
-                  Condition confirmed.
-                </p>
-                <p style={{ fontSize: '14px', fontWeight: 700, color: '#1A7340' }}>
-                  Listing activated.
-                </p>
-              </motion.div>
-
-              {error && (
-                <p style={{ color: '#CC0C39', fontSize: '13px', marginBottom: '12px' }}>
-                  {error}
-                </p>
-              )}
             </motion.div>
           )}
         </AnimatePresence>
 
+        {error && step !== 'scanning' && (
+          <p style={{ color: '#CC0C39', fontSize: '13px', marginBottom: '12px' }}>
+            {error}
+          </p>
+        )}
       </div>
     </div>
   );

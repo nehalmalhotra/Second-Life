@@ -154,6 +154,54 @@ export default function ConfirmedPage() {
           </div>
         </motion.div>
 
+        {/* Savings card */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.3 }}
+          style={{
+            background: '#FFFFFF',
+            border: '1px solid #DDD',
+            borderRadius: '12px',
+            padding: '16px',
+            marginBottom: '12px',
+          }}
+        >
+          <p style={{ fontSize: '13px', color: '#111111', fontWeight: 700, marginBottom: '8px' }}>
+            Your savings
+          </p>
+          <p style={{ fontSize: '20px', color: '#067D62', fontWeight: 700, margin: 0 }}>
+            ₹270 saved (18% off)
+          </p>
+          <p style={{ fontSize: '12px', color: '#999999', margin: '8px 0 0' }}>
+            vs buying new at ₹1,499
+          </p>
+        </motion.div>
+
+        {/* Sustainability card */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35, duration: 0.3 }}
+          style={{
+            background: '#E6F4EA',
+            border: '1px solid #A8D5B5',
+            borderRadius: '12px',
+            padding: '16px',
+            marginBottom: '12px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+            <span style={{ fontSize: '20px' }}>🌱</span>
+            <p style={{ fontSize: '13px', color: '#1A7340', fontWeight: 700, margin: 0 }}>
+              1 product given a second life
+            </p>
+          </div>
+          <p style={{ fontSize: '12px', color: '#555555', margin: 0 }}>
+            One reverse-logistics journey that never had to happen.
+          </p>
+        </motion.div>
+
         {/* Continue shopping button */}
         <motion.div
           initial={{ opacity: 0 }}

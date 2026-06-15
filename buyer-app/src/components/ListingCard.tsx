@@ -1,5 +1,31 @@
+import React, { useState } from 'react'
 import ConditionBadge from './ConditionBadge'
 import type { Listing } from '@/types'
+
+function ImageArea({ listing }: { listing: Listing }) {
+  const [imgError, setImgError] = useState<boolean>(false)
+  const src = `/products/${listing.product_id}.png`
+
+  if (!imgError) {
+    return (
+      <img
+        src={src}
+        alt={listing.listing_title}
+        style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px' }}
+        onError={(e) => {
+          setImgError(true)
+          ;(e.currentTarget as HTMLImageElement).style.display = 'none'
+        }}
+      />
+    )
+  }
+
+  return (
+    <div style={{ width: '80px', height: '80px', background: '#F3F3F3', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px' }}>
+      📦
+    </div>
+  )
+}
 
 interface Props {
   listing: Listing
@@ -8,11 +34,7 @@ interface Props {
 }
 
 export default function ListingCard({ listing, isHighlighted = false, onClick }: Props) {
-  const productEmoji: Record<string, string> = {
-    P009: '🔊',
-    P006: '💪',
-    P005: '🧘',
-  }
+  
 
   return (
     <div
@@ -45,7 +67,8 @@ export default function ListingCard({ listing, isHighlighted = false, onClick }:
         fontSize: '48px',
         flexShrink: 0,
       }}>
-        {productEmoji[listing.product_id] ?? '📦'}
+        {/* Real product image with fallback */}
+        <ImageArea listing={listing} />
       </div>
 
       {/* Details */}

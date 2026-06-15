@@ -45,39 +45,16 @@ export default function NotificationBanner({ notification, onTap }: Props) {
         </div>
 
         <div style={{ flex: 1 }}>
-          {/* Header */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
-            <p style={{ fontSize: '12px', fontWeight: 700, color: '#111111' }}>
-              amazon <span style={{ color: '#FF9900' }}>second life</span>
-            </p>
-            <p style={{ fontSize: '10px', color: '#999999' }}>Just now</p>
-          </div>
-
-          {/* Main text */}
-          <p style={{ fontSize: '13px', color: '#111111', fontWeight: 600, marginBottom: '3px' }}>
-            {notification.listing_title.split(' — ')[0]} near you
+          <p style={{ fontSize: '13px', color: '#111111', fontWeight: 700, marginBottom: '6px' }}>
+            A verified Second Life item matching your interests is available nearby
           </p>
 
-          {/* Details row */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <span style={{
-              fontSize: '11px', fontWeight: 600,
-              background: '#E6F4EA', color: '#1A7340',
-              padding: '2px 8px', borderRadius: '100px',
-            }}>
-              {notification.condition_badge}
-            </span>
-            <span style={{ fontSize: '12px', fontWeight: 700, color: '#111111' }}>
-              ₹{notification.discounted_price.toLocaleString()}
-            </span>
-            <span style={{ fontSize: '11px', color: '#067D62', fontWeight: 600 }}>
-              · {notification.estimated_delivery}
-            </span>
-          </div>
+          <p style={{ fontSize: '12px', color: '#555555', margin: 0, lineHeight: 1.4 }}>
+            {notification.listing_title.split(' — ')[0]} · {notification.condition_badge} · ₹{notification.discounted_price.toLocaleString()} · {notification.estimated_delivery}
+          </p>
         </div>
       </div>
 
-      {/* Tap hint */}
       <div style={{
         marginTop: '10px',
         paddingTop: '10px',
@@ -85,8 +62,8 @@ export default function NotificationBanner({ notification, onTap }: Props) {
         display: 'flex',
         justifyContent: 'center',
       }}>
-        <span style={{ fontSize: '12px', color: '#FF9900', fontWeight: 600 }}>
-          Tap to view listing →
+        <span style={{ fontSize: '12px', color: '#FF9900', fontWeight: 600, padding: '6px 12px', borderRadius: '999px', background: '#FFF6E5' }}>
+          Tap to view →
         </span>
       </div>
     </motion.div>
