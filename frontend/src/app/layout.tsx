@@ -3,7 +3,7 @@ import './globals.css'
 import AmazonChrome from '@/components/AmazonChrome'
 
 export const metadata: Metadata = {
-  title: 'Second Life',
+  title: 'Amazon Second Life',
   description: 'Give your products a second life',
   icons: { icon: '/favicon.ico' },
 }

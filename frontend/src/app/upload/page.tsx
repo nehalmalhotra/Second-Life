@@ -20,7 +20,7 @@ const LOADING_MESSAGES = [
   'Generating condition report...',
 ]
 
-const SLOT_LABELS = ['Product Front', 'Product Side', 'Packaging']
+const SLOT_LABELS = ['Product Image', 'Product Image', 'Packaging']
 
 interface UploadPageProps {
   productId?: string
@@ -259,7 +259,7 @@ export default function UploadPage({
                   ? 'Tap each box to upload a photo'
                   : previews.length < 3
                   ? `${previews.length}/3 photos added — add more for better accuracy`
-                  : '✓ 3 photos ready — tap Analyze to continue'}
+                  : ' Tap Analyze to Continue'}
               </div>
 
               {/* Optional comment textarea */}

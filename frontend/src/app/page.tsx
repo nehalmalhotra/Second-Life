@@ -1,96 +1,182 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-
-const products = [
-  { name: 'Boldfit Resistance Bands', price: '₹419', original: '₹599' },
-  { name: 'Cello Water Bottle', price: '₹244', original: '₹349' },
-  { name: 'Zebronics USB Mouse', price: '₹174', original: '₹249' },
-  { name: 'AGARO Kitchen Tool Set', price: '₹439', original: '₹799' },
-  { name: 'Boldfit Yoga Mat', price: '₹819', original: '₹999' },
-  { name: 'Ambrane Phone Stand', price: '₹279', original: '₹399' },
-]
+import Link from 'next/link'
+import { useState } from 'react'
 
 export default function Home() {
-  const router = useRouter()
-
   return (
-    <div style={{ minHeight: '100vh', background: '#F3F3F3', padding: '0 16px' }}>
-      <header style={{ background: '#131921', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px' }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-          <span style={{ color: '#FFFFFF', fontSize: 20, fontWeight: 700, textTransform: 'lowercase' }}>amazon</span>
-          <span style={{ color: '#FF9900', fontSize: 20, fontWeight: 700 }}>second life</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div style={{ color: '#FFFFFF', fontSize: 12, lineHeight: 1.3, textAlign: 'right' }}>
-            Hello, Rahul
-            <div style={{ fontWeight: 700 }}>Account & Lists</div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', background: '#FFFFFF', borderRadius: 999, padding: '6px 12px', minWidth: 280, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-            <input
-              type="text"
-              placeholder="Search Second Life"
-              style={{ flex: 1, border: 'none', outline: 'none', fontSize: 12, color: '#111' }}
-            />
-            <button
-              type="button"
-              style={{ border: 'none', background: '#FF9900', borderRadius: 999, padding: '8px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
-            >
-              Search
-            </button>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#FFFFFF', fontSize: 14 }}>
-            <span style={{ fontSize: 18 }}>&#128722;</span>
-            <span>Cart</span>
-          </div>
-        </div>
-      </header>
+    <div
+      style={{
+        background: 'var(--color-amazon-page-bg)',
+        minHeight: '100vh',
+        fontFamily: 'var(--font-amazon)',
+      }}
+    >
+      {/* ─── Hero Banner (clickable → seller Second Life marketplace) ─── */}
+      <HeroBanner />
 
-      <main style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 0 48px' }}>
-        <section style={{ width: '100%', position: 'relative', overflow: 'hidden', borderRadius: 12, background: 'linear-gradient(135deg, #131921 0%, #232F3E 100%)', minHeight: 200, display: 'flex', alignItems: 'center', padding: 24, marginBottom: 32 }}>
+      {/* ─── Card Grid Section ─── */}
+      <div
+        style={{
+          maxWidth: '1200px',
+          margin: '0 auto',
+          padding: '20px 16px',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+          gap: '16px',
+        }}
+      >
+        <SectionCard title="Pick up where you left off">
+          <ProductGrid
+            items={[
+              { image: '/assets/products/boat-rockerz-255.png', caption: 'boAt Rockerz 255' },
+              { image: '/assets/products/fire-boltt-ninja.png', caption: 'Fire-Boltt Ninja' },
+              { image: '/assets/products/noise-colorfit.png', caption: 'Noise ColorFit' },
+              { image: '/assets/products/jbl-tune-230nc.png', caption: 'JBL Tune 230NC' },
+            ]}
+          />
+        </SectionCard>
+
+        <SectionCard title="Keep shopping for">
+          <ProductGrid
+            items={[
+              { image: '/assets/products/samsung-galaxy-buds.png', caption: 'Samsung Galaxy Buds' },
+              { image: '/assets/products/sony-wh1000xm4.png', caption: 'Sony WH-1000XM4' },
+              { image: '/assets/products/kindle-paperwhite.png', caption: 'Kindle Paperwhite' },
+              { image: '/assets/products/echo-dot-5th-gen.png', caption: 'Echo Dot 5th Gen' },
+            ]}
+          />
+        </SectionCard>
+
+        <SectionCard title="Continue shopping deals">
+          <ProductGrid
+            items={[
+              { image: '/assets/products/mi-power-bank-20000.png', caption: 'Mi Power Bank 20000' },
+              { image: '/assets/products/boat-airdopes-141.png', caption: 'boAt Airdopes 141' },
+              { image: '/assets/products/realme-buds-air-5.png', caption: 'Realme Buds Air 5' },
+              { image: '/assets/products/oneplus-nord-buds-2.png', caption: 'OnePlus Nord Buds 2' },
+            ]}
+          />
+        </SectionCard>
+
+        <SectionCard title="Bulk discounts for you">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ background: '#FEF8E7', border: '1px solid #F5D679', borderRadius: '6px', padding: '12px' }}>
+              <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--color-amazon-text)' }}>Up to 70% off</p>
+              <p style={{ fontSize: '12px', color: '#565959' }}>Certified refurbished electronics</p>
+            </div>
+            <div style={{ background: '#F0F8F0', border: '1px solid #A8D5B5', borderRadius: '6px', padding: '12px' }}>
+              <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--color-amazon-text)' }}>Buy 2, save extra 10%</p>
+              <p style={{ fontSize: '12px', color: '#565959' }}>Second Life bundles — limited time</p>
+            </div>
+            <div style={{ background: '#FFF4F0', border: '1px solid #F5C0A8', borderRadius: '6px', padding: '12px' }}>
+              <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--color-amazon-text)' }}>Subscribe &amp; Save 15%</p>
+              <p style={{ fontSize: '12px', color: '#565959' }}>Monthly essentials auto-delivery</p>
+            </div>
+          </div>
+        </SectionCard>
+      </div>
+    </div>
+  )
+}
+
+/* ─── Hero Banner ───
+   Clicking it routes to the seller's Second Life marketplace (/second-life),
+   exactly mirroring the buyer home, whose banner routes to /marketplace. */
+function HeroBanner() {
+  const [imageError, setImageError] = useState(false)
+  return (
+    <Link href="/second-life" style={{ cursor: 'pointer', display: 'block' }}>
+      <div
+        style={{
+          width: '100%',
+          aspectRatio: '1500 / 300',
+          position: 'relative',
+          background: imageError ? 'var(--color-amazon-page-bg)' : 'transparent',
+        }}
+      >
+        {!imageError && (
           <img
             src="/second-life-hero.png"
-            alt="Second Life"
-            style={{ width: '360px', maxWidth: '100%', objectFit: 'cover', borderRadius: 12, boxShadow: '0 16px 40px rgba(0,0,0,0.25)' }}
+            alt="Browse the Second Life pre-owned marketplace"
+            onError={() => setImageError(true)}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
-          <div style={{ marginLeft: 32, maxWidth: 600, color: '#FFFFFF' }}>
-            <h1 style={{ margin: 0, fontSize: 40, lineHeight: 1.05, color: '#FF9900' }}>Amazon Second Life</h1>
-            <p style={{ margin: '16px 0 24px', fontSize: 16, lineHeight: 1.6, maxWidth: 520 }}>The trust of buying new, at the price of pre-owned.</p>
-            <button
-              type="button"
-              onClick={() => router.push('/orders')}
-              style={{ background: '#FF9900', color: '#111111', border: 'none', borderRadius: 999, padding: '14px 22px', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}
-            >
-              Give Your Product a Second Life
-            </button>
-          </div>
-        </section>
+        )}
+      </div>
+    </Link>
+  )
+}
 
-        <section style={{ background: '#FFFFFF', padding: 24, borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
-          <h2 style={{ margin: 0, marginBottom: 20, color: '#111111', fontSize: 20, fontWeight: 700 }}>Today's Deals</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 16 }}>
-            {products.map((product) => (
-              <div key={product.name} style={{ background: '#FFFFFF', border: '1px solid #DDD', borderRadius: 8, padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#111111' }}>{product.name}</div>
-                <div style={{ fontSize: 18, fontWeight: 700, color: '#111111' }}>{product.price}</div>
-                <div style={{ fontSize: 12, color: '#999999', textDecoration: 'line-through' }}>{product.original}</div>
-                <span style={{ display: 'inline-block', background: '#E6F4EA', color: '#1A7340', borderRadius: 100, padding: '3px 10px', fontSize: 11, fontWeight: 700, width: 'fit-content' }}>Second Life</span>
-              </div>
-            ))}
-          </div>
-        </section>
+function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div
+      style={{
+        background: 'var(--color-amazon-card)',
+        border: '1px solid var(--color-amazon-card-border)',
+        borderRadius: 'var(--radius-card)',
+        boxShadow: 'var(--shadow-card)',
+        padding: '16px',
+      }}
+    >
+      <h2
+        style={{
+          fontSize: '16px',
+          fontWeight: 700,
+          color: 'var(--color-amazon-text)',
+          marginBottom: '12px',
+          fontFamily: 'var(--font-amazon)',
+        }}
+      >
+        {title}
+      </h2>
+      {children}
+    </div>
+  )
+}
 
-        <section style={{ background: '#232F3E', borderRadius: 12, padding: 24, marginTop: 32, textAlign: 'center' }}>
-          <p style={{ margin: 0, marginBottom: 16, color: '#FFFFFF', fontSize: 16, fontWeight: 500 }}>Have a product gathering dust?</p>
-          <button
-            type="button"
-            onClick={() => router.push('/orders')}
-            style={{ background: '#FF9900', color: '#111111', border: 'none', borderRadius: 999, padding: '14px 22px', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}
+function ProductGrid({ items }: { items: { image: string; caption: string }[] }) {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+      {items.map((item) => (
+        <div key={item.caption}>
+          <div
+            style={{
+              width: '100%',
+              aspectRatio: '1',
+              background: '#F7F7F7',
+              borderRadius: '4px',
+              overflow: 'hidden',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '6px',
+              padding: '8px',
+            }}
           >
-            List it on Second Life →
-          </button>
-        </section>
-      </main>
+            <img
+              src={item.image}
+              alt={item.caption}
+              style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+              onError={(e) => {
+                const el = e.target as HTMLImageElement
+                el.style.display = 'none'
+                el.parentElement!.style.background = '#EAEDED'
+              }}
+            />
+          </div>
+          <p
+            style={{
+              fontSize: '12px',
+              color: 'var(--color-amazon-text)',
+              fontFamily: 'var(--font-amazon)',
+              lineHeight: 1.3,
+            }}
+          >
+            {item.caption}
+          </p>
+        </div>
+      ))}
     </div>
   )
 }

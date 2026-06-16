@@ -72,13 +72,35 @@ export default function MarketplacePage() {
             <span style={{ fontSize: '12px', color: '#565959' }}>›</span>
             <span style={{ fontSize: '12px', color: '#565959' }}>Second Life</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
             <h1 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--color-amazon-text)' }}>
               Second Life near you
             </h1>
-            <span style={{ fontSize: '13px', color: '#565959' }}>
-              {filtered.length} results in Second Life near you
-            </span>
+
+            {/* Right side: static CTA (visual only) above the results count.
+                Mirrors the seller's functional button placement; intentionally
+                NOT clickable on the buyer side. */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+              <span
+                style={{
+                  background: 'var(--color-secondlife)',
+                  color: '#111111',
+                  borderRadius: '999px',
+                  padding: '10px 20px',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  cursor: 'default',
+                  whiteSpace: 'nowrap',
+                  userSelect: 'none',
+                  fontFamily: 'var(--font-amazon)',
+                }}
+              >
+                Give Your Product a Second Life
+              </span>
+              <span style={{ fontSize: '13px', color: '#565959' }}>
+                {filtered.length} results in Second Life near you
+              </span>
+            </div>
           </div>
           <p style={{ fontSize: '13px', color: '#565959', marginTop: '2px' }}>
             Patiala · Verified by Amazon AI

@@ -27,7 +27,7 @@ export default function AmazonChrome() {
         {/* Deliver to */}
         <div style={{ display: 'flex', flexDirection: 'column', flexShrink: 0, cursor: 'default' }}>
           <span style={{ fontSize: '11px', color: '#CCCCCC', fontFamily: 'var(--font-amazon)' }}>
-            Deliver to Nehal
+            Deliver to Navya
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2">
@@ -35,7 +35,7 @@ export default function AmazonChrome() {
               <circle cx="12" cy="10" r="3" />
             </svg>
             <span style={{ fontSize: '13px', color: '#FFFFFF', fontWeight: 700, fontFamily: 'var(--font-amazon)' }}>
-              Patiala 147004
+              Thane 400601
             </span>
           </div>
         </div>
@@ -118,7 +118,7 @@ export default function AmazonChrome() {
         {/* Account */}
         <div style={{ display: 'flex', flexDirection: 'column', flexShrink: 0, cursor: 'default' }}>
           <span style={{ fontSize: '11px', color: '#CCCCCC', fontFamily: 'var(--font-amazon)' }}>
-            Hello, Nehal
+            Hello, Navya
           </span>
           <span style={{ fontSize: '13px', color: '#FFFFFF', fontWeight: 700, fontFamily: 'var(--font-amazon)' }}>
             Account &amp; Lists

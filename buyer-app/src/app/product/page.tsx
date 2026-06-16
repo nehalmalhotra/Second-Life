@@ -99,7 +99,7 @@ export default function ProductPage() {
 
             <div style={{ background: '#F8F4FF', border: '1px solid #C9B8F0', borderRadius: 12, padding: 16 }}>
               <p style={{ fontSize: '11px', fontWeight: 700, color: '#6B46C1', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 10 }}>
-                Why this was recommended to {ASHISH.name}
+                Why this was recommended to you
               </p>
               <p style={{ margin: 0, fontSize: '14px', color: 'var(--color-amazon-text)', lineHeight: 1.6, marginBottom: 14 }}>
                 Matched because: {MATCH_REASON}

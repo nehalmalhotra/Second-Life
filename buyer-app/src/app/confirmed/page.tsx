@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { RAHUL_LISTING, ASHISH } from '@/data/mockData'
@@ -53,7 +54,7 @@ export default function ConfirmedPage() {
               Order placed, thank you!
             </h1>
             <p style={{ fontSize: '14px', color: '#565959' }}>
-              Confirmation will be sent to {ASHISH.name}&apos;s email.
+              Confirmation will be sent through email.
             </p>
           </div>
         </motion.div>
@@ -76,15 +77,26 @@ export default function ConfirmedPage() {
           </p>
 
           <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-            <div style={{
-              width: '72px', height: '72px',
-              background: '#F7F7F7',
-              borderRadius: '4px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '36px',
-              flexShrink: 0,
-            }}>
-              🔊
+            <div
+              style={{
+                width: '72px',
+                height: '72px',
+                background: '#F7F7F7',
+                borderRadius: '4px',
+                position: 'relative',
+                overflow: 'hidden',
+                flexShrink: 0,
+              }}
+            >
+              <Image
+                src="/products/P009.png"
+                alt="boAt Aavante Bar 490 Bluetooth Speaker"
+                fill
+                style={{
+                  objectFit: 'contain',
+                  padding: '4px',
+                }}
+              />
             </div>
             <div>
               <p style={{ fontSize: '14px', fontWeight: 400, color: 'var(--color-amazon-link)', marginBottom: '4px' }}>
@@ -147,7 +159,7 @@ export default function ConfirmedPage() {
 
           {/* Payment method */}
           <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid var(--color-amazon-card-border)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '16px' }}>🔒</span>
+           
             <span style={{ fontSize: '13px', color: 'var(--color-amazon-text)' }}>
               Paid via <strong>Amazon Pay</strong>
             </span>

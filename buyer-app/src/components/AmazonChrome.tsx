@@ -35,7 +35,7 @@ export default function AmazonChrome() {
               <circle cx="12" cy="10" r="3" />
             </svg>
             <span style={{ fontSize: '13px', color: '#FFFFFF', fontWeight: 700, fontFamily: 'var(--font-amazon)' }}>
-              Patiala 147004
+               Andheri 400058
             </span>
           </div>
         </div>

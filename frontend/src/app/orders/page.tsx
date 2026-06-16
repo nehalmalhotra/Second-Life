@@ -2,104 +2,279 @@
 
 import { useRouter } from 'next/navigation'
 
+interface Order {
+  orderId: string
+  placed: string
+  total: string
+  deliveredText: string
+  image: string
+  title: string
+  action: { label: string; kind: 'primary' | 'secondary'; href: string }
+}
+
+const orders: Order[] = [
+  {
+    orderId: 'D01-4799107-0101424',
+    placed: '10 Oct 2024',
+    total: '₹1,499',
+    deliveredText: 'Delivered 10 Oct 2024',
+    image: '/products/P009.png',
+    title: 'boAt Aavante Bar 490 Bluetooth Speaker',
+    action: { label: 'Give It a Second Life', kind: 'primary', href: '/upload' },
+  },
+  {
+    orderId: 'D01-7371857-6504643',
+    placed: '22 Mar 2025',
+    total: '₹799',
+    deliveredText: 'Delivered 22 Mar 2025',
+    image: '/products/P004.png',
+    title: 'AGARO Majestic Kitchen Tool Set',
+    action: { label: 'Return or Replace Items', kind: 'secondary', href: '/return-flow' },
+  },
+]
+
 export default function OrdersPage() {
   const router = useRouter()
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F3F3F3' }}>
-      <header style={{ position: 'sticky', top: 0, zIndex: 20, background: '#131921', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px' }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-          <span style={{ color: '#FFFFFF', fontSize: 20, fontWeight: 700, textTransform: 'lowercase' }}>amazon</span>
-          <span style={{ color: '#FF9900', fontSize: 20, fontWeight: 700 }}>second life</span>
+    <div style={{ minHeight: '100vh', background: '#FFFFFF', fontFamily: 'var(--font-amazon)' }}>
+      <main style={{ maxWidth: 1500, margin: '0 auto', padding: '20px 24px 48px' }}>
+        {/* Breadcrumb */}
+        <div style={{ fontSize: 13, marginBottom: 14 }}>
+          <span style={{ color: 'var(--color-amazon-link)' }}>Your Account</span>
+          <span style={{ color: '#565959' }}> › </span>
+          <span style={{ color: '#C7511F' }}>Your Orders</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div style={{ color: '#FFFFFF', fontSize: 12, lineHeight: 1.3, textAlign: 'right' }}>
-            Hello, Rahul
-            <div style={{ fontWeight: 700 }}>Account & Lists</div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', background: '#FFFFFF', borderRadius: 999, padding: '6px 12px', minWidth: 260, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-            <input
-              type="text"
-              placeholder="Search Second Life"
-              style={{ flex: 1, border: 'none', outline: 'none', fontSize: 12, color: '#111' }}
-            />
+
+        {/* Title + search */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 24,
+            marginBottom: 18,
+            maxWidth: 1040,
+            flexWrap: 'wrap',
+          }}
+        >
+          <h1 style={{ fontSize: 28, fontWeight: 500, color: 'var(--color-amazon-text)' }}>Your Orders</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: '1 1 340px', maxWidth: 520 }}>
+            <div
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                background: '#FFFFFF',
+                border: '1px solid #888C8C',
+                borderRadius: 8,
+                padding: '8px 12px',
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#565959" strokeWidth="2">
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.35-4.35" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Search all orders"
+                style={{ flex: 1, border: 'none', outline: 'none', fontSize: 14, color: '#111' }}
+              />
+            </div>
             <button
               type="button"
-              style={{ border: 'none', background: '#FF9900', borderRadius: 999, padding: '8px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
+              style={{
+                background: '#232F3E',
+                color: '#FFFFFF',
+                border: 'none',
+                borderRadius: 8,
+                padding: '10px 18px',
+                fontSize: 14,
+                fontWeight: 500,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
             >
-              Search
+              Search Orders
             </button>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#FFFFFF', fontSize: 14 }}>
-            <span style={{ fontSize: 18 }}>&#128722;</span>
-            <span>Cart</span>
           </div>
         </div>
-      </header>
 
-      <main style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 16px 40px' }}>
-        <h1 style={{ fontSize: 24, fontWeight: 700, color: '#111111', marginBottom: 24 }}>Your Orders</h1>
+        {/* Tabs */}
+        <div style={{ display: 'flex', gap: 28, borderBottom: '1px solid #D5D9D9', marginBottom: 20, maxWidth: 1040 }}>
+          <span
+            style={{
+              fontSize: 15,
+              fontWeight: 700,
+              color: 'var(--color-amazon-text)',
+              paddingBottom: 10,
+              borderBottom: '3px solid var(--color-secondlife)',
+              cursor: 'pointer',
+            }}
+          >
+            Orders
+          </span>
+          <span style={{ fontSize: 15, color: 'var(--color-amazon-link)', paddingBottom: 10, cursor: 'pointer' }}>
+            Buy Again
+          </span>
+          <span style={{ fontSize: 15, color: 'var(--color-amazon-link)', paddingBottom: 10, cursor: 'pointer' }}>
+            Not Yet Shipped
+          </span>
+        </div>
 
-        <div style={{ display: 'grid', gap: 16 }}>
-          <div style={{ background: '#FFFFFF', border: '1px solid #DDD', borderRadius: 8, padding: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 14 }}>
-              <img
-                src="/products/P009.png"
-                alt="boAt Aavante Bar 490 Bluetooth Speaker"
-                width={60}
-                height={60}
-                style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 8 }}
-              />
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#111111', marginBottom: 4 }}>
-                  boAt Aavante Bar 490 Bluetooth Speaker
+        {/* Order count + range */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
+          <span style={{ fontSize: 14, color: 'var(--color-amazon-text)' }}>
+            <strong>{orders.length} orders</strong> placed in
+          </span>
+          <select
+            defaultValue="3m"
+            style={{
+              fontSize: 14,
+              padding: '6px 10px',
+              borderRadius: 8,
+              border: '1px solid #888C8C',
+              background: '#F0F2F2',
+              cursor: 'pointer',
+            }}
+          >
+            <option value="3m">past 3 months</option>
+            <option value="6m">past 6 months</option>
+            <option value="2025">2025</option>
+            <option value="2024">2024</option>
+          </select>
+        </div>
+
+        {/* Orders */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1040 }}>
+          {orders.map((order) => (
+            <div
+              key={order.orderId}
+              style={{
+                border: '1px solid #D5D9D9',
+                borderRadius: 8,
+                overflow: 'hidden',
+                background: '#FFFFFF',
+              }}
+            >
+              {/* Gray header strip */}
+              <div
+                style={{
+                  background: '#F0F2F2',
+                  borderBottom: '1px solid #D5D9D9',
+                  padding: '12px 18px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                  gap: 24,
+                  flexWrap: 'wrap',
+                }}
+              >
+                <div style={{ display: 'flex', gap: 40, flexWrap: 'wrap' }}>
+                  <StripField label="ORDER PLACED" value={order.placed} />
+                  <StripField label="TOTAL" value={order.total} />
+                  <StripField label="SHIP TO" value="Nehal" link />
                 </div>
-                <div style={{ fontSize: 12, color: '#555555' }}>Delivered 10 Oct 2024</div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: 12, color: '#565959' }}>ORDER # {order.orderId}</div>
+                  <div style={{ fontSize: 13, marginTop: 2 }}>
+                    <span style={{ color: 'var(--color-amazon-link)', cursor: 'pointer' }}>View order details</span>
+                    <span style={{ color: '#D5D9D9', margin: '0 8px' }}>|</span>
+                    <span style={{ color: 'var(--color-amazon-link)', cursor: 'pointer' }}>Invoice ▾</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Body */}
+              <div
+                style={{
+                  padding: 18,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  gap: 24,
+                  flexWrap: 'wrap',
+                }}
+              >
+                <div style={{ flex: '1 1 360px' }}>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--color-amazon-text)', marginBottom: 12 }}>
+                    {order.deliveredText}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                    <img
+                      src={order.image}
+                      alt={order.title}
+                      style={{ width: 70, height: 70, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }}
+                      onError={(e) => {
+                        const el = e.target as HTMLImageElement
+                        el.style.display = 'none'
+                        el.parentElement!.style.background = '#EAEDED'
+                      }}
+                    />
+                    <div style={{ fontSize: 15, color: 'var(--color-amazon-link)', cursor: 'pointer', lineHeight: 1.4 }}>
+                      {order.title}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action button (behavior unchanged) */}
+                <div style={{ width: 240, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <button
+                    type="button"
+                    onClick={() => router.push(order.action.href)}
+                    style={
+                      order.action.kind === 'primary'
+                        ? {
+                            width: '100%',
+                            background: '#FF9900',
+                            color: '#111111',
+                            border: 'none',
+                            borderRadius: 8,
+                            padding: '12px 16px',
+                            fontSize: 14,
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                          }
+                        : {
+                            width: '100%',
+                            background: '#FFFFFF',
+                            color: '#111111',
+                            border: '1px solid #D5D9D9',
+                            borderRadius: 8,
+                            padding: '12px 16px',
+                            fontSize: 14,
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                          }
+                    }
+                  >
+                    {order.action.label}
+                  </button>
+                </div>
               </div>
             </div>
-
-            <div style={{ fontSize: 18, fontWeight: 700, color: '#111111', marginBottom: 16 }}>₹1,499</div>
-
-            <div style={{ background: '#FFF8E7', border: '1px solid #FFD966', borderRadius: 8, padding: 10, marginBottom: 16, color: '#7A5E10', fontSize: 13, lineHeight: 1.5 }}>
-              ✨ Eligible for Second Life — earn ₹1,229 with same-day pickup
-            </div>
-
-            <button
-              onClick={() => router.push('/upload')}
-              style={{ width: '100%', background: '#FF9900', color: '#111111', border: 'none', borderRadius: 8, padding: '14px 16px', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}
-            >
-              Give It a Second Life
-            </button>
-          </div>
-
-          <div style={{ background: '#FFFFFF', border: '1px solid #DDD', borderRadius: 8, padding: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 14 }}>
-              <img
-                src="/products/P004.png"
-                alt="AGARO Majestic Kitchen Tool Set"
-                width={60}
-                height={60}
-                style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 8 }}
-              />
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#111111', marginBottom: 4 }}>
-                  AGARO Majestic Kitchen Tool Set
-                </div>
-                <div style={{ fontSize: 12, color: '#555555' }}>Delivered 22 Mar 2025</div>
-              </div>
-            </div>
-
-            <div style={{ fontSize: 18, fontWeight: 700, color: '#111111', marginBottom: 16 }}>₹799</div>
-
-            <button
-              onClick={() => router.push('/return-flow')}
-              style={{ width: '100%', background: '#F3F3F3', color: '#111111', border: '1px solid #DDD', borderRadius: 8, padding: '14px 16px', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}
-            >
-              Return or Replace Items
-            </button>
-          </div>
+          ))}
         </div>
       </main>
+    </div>
+  )
+}
+
+function StripField({ label, value, link }: { label: string; value: string; link?: boolean }) {
+  return (
+    <div>
+      <div style={{ fontSize: 11, color: '#565959', textTransform: 'uppercase', letterSpacing: '0.3px' }}>{label}</div>
+      <div
+        style={{
+          fontSize: 13,
+          color: link ? 'var(--color-amazon-link)' : 'var(--color-amazon-text)',
+          marginTop: 2,
+          cursor: link ? 'pointer' : 'default',
+        }}
+      >
+        {value}
+        {link ? ' ▾' : ''}
+      </div>
     </div>
   )
 }
