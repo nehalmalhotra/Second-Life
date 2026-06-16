@@ -264,6 +264,3 @@ do not use `NEXT_PUBLIC_*` variables.
 
 ---
 
-## License
-
-*TODO: add a license (e.g. MIT) or state that the project is unlicensed/private.*
