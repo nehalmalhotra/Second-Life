@@ -1,9 +1,5 @@
 # Second Life Commerce
 
-> **TODO (only you can fill these):** confirm the project name above, add author/team
-> credits, choose a license, and add the repo URL. Runtime version pins are noted as
-> TODOs in [Prerequisites](#prerequisites) because the repo doesn't pin them.
-
 An AI-powered re-commerce platform that gives returned and pre-owned products a second
 life through Amazon's ecosystem. It uses AWS Bedrock vision models to assess product
 condition, automatically prices items, matches them to nearby buyers, and delivers
@@ -45,9 +41,9 @@ buyer app symlinks the repo-root `assets/` into its `public/` via a predev scrip
 
 ### Prerequisites
 
-- **Python** — not pinned in the repo. *TODO: pin the version you use* (FastAPI + boto3
+- **Python** — (FastAPI + boto3
   run on 3.9+).
-- **Node.js** — not pinned in the repo. *TODO: pin the version you use* (Next.js 16
+- **Node.js** — (Next.js 16
   requires Node 20+).
 - **AWS credentials with Bedrock access** — optional. Mock mode runs the whole demo
   without AWS (see [Mock mode](#mock-mode)).
